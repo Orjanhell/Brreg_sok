@@ -66,7 +66,6 @@ def hent_underenheter(orgnummer):
         print(f"Feil under henting av underenheter: {e}")
         return []
 
-
 def søk_enheter(søkeord, maks_resultater=100):
     try:
         resultater = []
