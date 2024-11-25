@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirmaSøk</title>
+</head>
+<body>
+    <h1>FirmaSøk</h1>
+    <form method="post">
+        <label for="søkeord">Angi firmanavn eller organisasjonsnummer:</label>
+        <input type="text" id="søkeord" name="søkeord" required>
+        <button type="submit">Søk</button>
+    </form>
+
+    {% if resultater %}
+        <h2>Søkeresultater</h2>
+        <table>
+            <tr>
+                <th>Organisasjonsnummer</th>
+                <th>Navn</th>
+                <th>Adresse</th>
+            </tr>
+            {% for firma in resultater %}
+                <tr>
+                    <td>{{ firma.organisasjonsnummer }}</td>
+                    <td>{{ firma.navn }}</td>
+                    <td>{{ firma.adresse }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% elif enhet %}
+        <h2>Detaljer for enhet</h2>
+        <p>Navn: {{ enhet['navn'] }}</p>
+        <p>Adresse: {{ enhet['forretningsadresse']['adresse'] }}</p>
+    {% endif %}
+</body>
+</html>
