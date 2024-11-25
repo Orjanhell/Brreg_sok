@@ -53,38 +53,25 @@ def hent_underenheter(orgnummer):
         # Hent relevante underenheter
         underenheter = []
         for underenhet in data.get("_embedded", {}).get("underenheter", []):
-            adresse = underenhet.get("beliggenhetsadresse", {})
+            adresse_data = underenhet.get("beliggenhetsadresse", {})
+            
+            # Håndtering av feltene
+            adresse_tekst = ", ".join(adresse_data.get("adresse", []))  # Formater adresselisten
+            postnummer = ", ".join(adresse_data.get("postnummer", [])) if "postnummer" in adresse_data else "Ikke oppgitt"
+            poststed = adresse_data.get("poststed", "Ikke oppgitt")
+            
             underenheter.append({
                 "organisasjonsnummer": underenhet["organisasjonsnummer"],
                 "navn": underenhet["navn"],
-                "adresse_tekst": formater_adresse(adresse.get("adresse", [])),
-                "postnummer": adresse.get("postnummer", "Ikke oppgitt"),
-                "poststed": adresse.get("poststed", "Ikke oppgitt")
+                "adresse_tekst": adresse_tekst if adresse_tekst else "Ikke oppgitt",
+                "postnummer": postnummer,
+                "poststed": poststed,
             })
         return underenheter
     except requests.exceptions.RequestException as e:
         print(f"Feil under henting av underenheter: {e}")
         return []
 
-def søk_enheter(søkeord, maks_resultater=100):
-    try:
-        resultater = []
-        params = {"navn": søkeord, "size": maks_resultater, "page": 0}
-        response = requests.get(API_BASE_URL, params=params)
-        response.raise_for_status()
-        data = response.json()
-
-        for enhet in data.get("_embedded", {}).get("enheter", []):
-            resultater.append({
-                "organisasjonsnummer": enhet["organisasjonsnummer"],
-                "navn": enhet["navn"],
-                "adresse": enhet.get("forretningsadresse", {})
-            })
-
-        return resultater
-    except requests.exceptions.RequestException as e:
-        print(f"Feil under søk: {e}")
-        return []
 
 @app.route("/", methods=["GET", "POST"])
 def index():
