@@ -1,38 +1,101 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FirmaSøk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin: 20px auto;
+            width: 80%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .no-results {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
     <h1>FirmaSøk</h1>
-    <form method="post">
-        <label for="søkeord">Angi firmanavn eller organisasjonsnummer:</label>
-        <input type="text" id="søkeord" name="søkeord" required>
+    <form method="POST">
+        <input type="text" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" required>
         <button type="submit">Søk</button>
     </form>
-
-    {% if resultater %}
-        <h2>Søkeresultater</h2>
-        <table>
-            <tr>
-                <th>Organisasjonsnummer</th>
-                <th>Navn</th>
-                <th>Adresse</th>
-            </tr>
-            {% for firma in resultater %}
-                <tr>
-                    <td>{{ firma.organisasjonsnummer }}</td>
-                    <td>{{ firma.navn }}</td>
-                    <td>{{ firma.adresse }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% elif enhet %}
-        <h2>Detaljer for enhet</h2>
-        <p>Navn: {{ enhet['navn'] }}</p>
-        <p>Adresse: {{ enhet['forretningsadresse']['adresse'] }}</p>
-    {% endif %}
+    <div class="results">
+        {% if resultater %}
+            <h2>Resultater</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                        <th>Postnummer</th>
+                        <th>Sted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for firma in resultater %}
+                        <tr>
+                            <td>{{ firma.organisasjonsnummer }}</td>
+                            <td>{{ firma.navn }}</td>
+                            <td>{{ firma.adresse_tekst }}</td>
+                            <td>{{ firma.postnummer }}</td>
+                            <td>{{ firma.poststed }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        {% elif søkeord %}
+            <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
+        {% endif %}
+    </div>
 </body>
 </html>

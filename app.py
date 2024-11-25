@@ -11,11 +11,13 @@ API_UNDERENHETER_URL = "https://data.brreg.no/enhetsregisteret/api/underenheter"
 
 # Formatering og funksjoner for å hente data
 def formater_adresse(adresse_data):
-    if isinstance(adresse_data, list):
+    """Formaterer adressefeltet til en lesbar streng."""
+    if isinstance(adresse_data, list):  # Hvis adresse er en liste
         return ", ".join(adresse_data)
-    elif isinstance(adresse_data, str):
+    elif isinstance(adresse_data, str):  # Hvis adresse er en streng
         return adresse_data
-    return None
+    return "Ikke oppgitt"
+
 
 def hent_enhet(orgnummer):
     try:
@@ -49,14 +51,31 @@ def søk_enheter(søkeord, maks_resultater=100):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        søkeord = request.form["søkeord"]
-        if søkeord.isdigit():
+        søkeord = request.form.get("søkeord", "").strip()
+        resultater = []
+
+        if søkeord.isdigit():  # Hvis organisasjonsnummer
             enhet = hent_enhet(søkeord)
-            return render_template("index.html", enhet=enhet)
-        else:
-            resultater = søk_enheter(søkeord)
-            return render_template("index.html", resultater=resultater)
-    return render_template("index.html")
+            if enhet:
+                adresse = enhet.get("forretningsadresse", {})
+                enhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
+                enhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
+                enhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
+                resultater.append(enhet)
+        else:  # Hvis firmanavn
+            enheter = søk_enheter(søkeord)
+            for enhet in enheter:
+                adresse = enhet.get("forretningsadresse", {})
+                enhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
+                enhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
+                enhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
+            resultater = enheter
+
+        return render_template("index.html", resultater=resultater, søkeord=søkeord)
+
+    return render_template("index.html", resultater=None)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
