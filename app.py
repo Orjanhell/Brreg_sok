@@ -20,13 +20,52 @@ def formater_adresse(adresse_data):
 
 
 def hent_enhet(orgnummer):
+    """Hent detaljer om en spesifikk enhet eller underenhet."""
     try:
         response = requests.get(f"{API_BASE_URL}/{orgnummer}")
+        if response.status_code == 404:
+            # Hvis ikke en hovedenhet, prøv som underenhet
+            response = requests.get(f"{API_UNDERENHETER_URL}/{orgnummer}")
+        
         response.raise_for_status()
-        return response.json()
+        enhet = response.json()
+
+        # Velg riktig adressefelt basert på typen enhet
+        adressefelt = "forretningsadresse" if "forretningsadresse" in enhet else "beliggenhetsadresse"
+        adresse = enhet.get(adressefelt, {})
+        enhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
+        enhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
+        enhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
+
+        return enhet
     except requests.exceptions.RequestException as e:
         print(f"Feil under henting av enhet: {e}")
         return None
+
+def hent_underenheter(orgnummer):
+    """Hent underenheter for en spesifikk enhet"""
+    try:
+        params = {"overordnetEnhet": orgnummer}
+        response = requests.get(API_UNDERENHETER_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        # Hent relevante underenheter
+        underenheter = []
+        for underenhet in data.get("_embedded", {}).get("underenheter", []):
+            adresse = underenhet.get("beliggenhetsadresse", {})
+            underenheter.append({
+                "organisasjonsnummer": underenhet["organisasjonsnummer"],
+                "navn": underenhet["navn"],
+                "adresse_tekst": formater_adresse(adresse.get("adresse", [])),
+                "postnummer": adresse.get("postnummer", "Ikke oppgitt"),
+                "poststed": adresse.get("poststed", "Ikke oppgitt")
+            })
+        return underenheter
+    except requests.exceptions.RequestException as e:
+        print(f"Feil under henting av underenheter: {e}")
+        return []
+
 
 def søk_enheter(søkeord, maks_resultater=100):
     try:
