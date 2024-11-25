@@ -1,106 +1,92 @@
-import requests
 from flask import Flask, render_template, request
-from tabulate import tabulate
+import requests
 
-# Flask-applikasjon
 app = Flask(__name__)
 
 # Base-URLer for API-et
 API_BASE_URL = "https://data.brreg.no/enhetsregisteret/api/enheter"
 API_UNDERENHETER_URL = "https://data.brreg.no/enhetsregisteret/api/underenheter"
 
-# Formatering og funksjoner for å hente data
 def formater_adresse(adresse_data):
-    """Formaterer adressefeltet til en lesbar streng."""
-    if isinstance(adresse_data, list):  # Hvis adresse er en liste
-        return ", ".join(adresse_data)
-    elif isinstance(adresse_data, str):  # Hvis adresse er en streng
-        return adresse_data
-    return "Ikke oppgitt"
+    """Formaterer adressefeltet for visning."""
+    adresse = ", ".join(adresse_data.get("adresse", [])) if "adresse" in adresse_data else None
+    postnummer = adresse_data.get("postnummer", None)
+    poststed = adresse_data.get("poststed", None)
 
+    deler = [del for del in [adresse, postnummer, poststed] if del]
+    return ", ".join(deler) if deler else "Ikke oppgitt"
 
 def hent_enhet(orgnummer):
-    """Hent detaljer om en spesifikk enhet eller underenhet."""
+    """Hent detaljer om en spesifikk enhet."""
     try:
         response = requests.get(f"{API_BASE_URL}/{orgnummer}")
-        if response.status_code == 404:
-            # Hvis ikke en hovedenhet, prøv som underenhet
-            response = requests.get(f"{API_UNDERENHETER_URL}/{orgnummer}")
-        
         response.raise_for_status()
-        enhet = response.json()
-
-        # Velg riktig adressefelt basert på typen enhet
-        adressefelt = "forretningsadresse" if "forretningsadresse" in enhet else "beliggenhetsadresse"
-        adresse = enhet.get(adressefelt, {})
-        enhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
-        enhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
-        enhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
-
-        return enhet
+        data = response.json()
+        adresse = formater_adresse(data.get("forretningsadresse", {}))
+        data["adresse"] = adresse
+        return data
     except requests.exceptions.RequestException as e:
         print(f"Feil under henting av enhet: {e}")
         return None
 
 def hent_underenheter(orgnummer):
-    """Hent underenheter for en spesifikk enhet"""
+    """Hent underenheter for en spesifikk enhet."""
+    underenheter = []
     try:
-        params = {"overordnetEnhet": orgnummer}
-        response = requests.get(API_UNDERENHETER_URL, params=params)
+        url = API_UNDERENHETER_URL
+        params = {"overordnetEnhet": orgnummer, "size": 100}
+        response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
 
-        # Hent relevante underenheter
-        underenheter = []
         for underenhet in data.get("_embedded", {}).get("underenheter", []):
-            adresse_data = underenhet.get("beliggenhetsadresse", {})
-            
-            # Håndtering av feltene
-            adresse_tekst = ", ".join(adresse_data.get("adresse", []))  # Formater adresselisten
-            postnummer = ", ".join(adresse_data.get("postnummer", [])) if "postnummer" in adresse_data else "Ikke oppgitt"
-            poststed = adresse_data.get("poststed", "Ikke oppgitt")
-            
+            adresse = formater_adresse(underenhet.get("beliggenhetsadresse", {}))
             underenheter.append({
-                "organisasjonsnummer": underenhet["organisasjonsnummer"],
-                "navn": underenhet["navn"],
-                "adresse_tekst": adresse_tekst if adresse_tekst else "Ikke oppgitt",
-                "postnummer": postnummer,
-                "poststed": poststed,
+                "organisasjonsnummer": underenhet.get("organisasjonsnummer", "Ikke oppgitt"),
+                "navn": underenhet.get("navn", "Ikke oppgitt"),
+                "adresse": adresse
             })
-        return underenheter
+
     except requests.exceptions.RequestException as e:
         print(f"Feil under henting av underenheter: {e}")
-        return []
+    return underenheter
 
+def søk_enheter(søkeord):
+    """Søk etter firma basert på navn."""
+    resultater = []
+    try:
+        params = {"navn": søkeord, "size": 20}
+        response = requests.get(API_BASE_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
 
-@app.route("/", methods=["GET", "POST"])
+        for enhet in data.get("_embedded", {}).get("enheter", []):
+            adresse = formater_adresse(enhet.get("forretningsadresse", {}))
+            resultater.append({
+                "organisasjonsnummer": enhet.get("organisasjonsnummer", "Ikke oppgitt"),
+                "navn": enhet.get("navn", "Ikke oppgitt"),
+                "adresse": adresse
+            })
+    except requests.exceptions.RequestException as e:
+        print(f"Feil under søk: {e}")
+    return resultater
+
+@app.route("/")
 def index():
-    if request.method == "POST":
-        søkeord = request.form.get("søkeord", "").strip()
-        hovedenhet = None
-        underenheter = []
+    return render_template("index.html")
 
-        if søkeord.isdigit():  # Hvis organisasjonsnummer
-            hovedenhet = hent_enhet(søkeord)
-            if hovedenhet:
-                adresse = hovedenhet.get("forretningsadresse", {})
-                hovedenhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
-                hovedenhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
-                hovedenhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
-
-                # Hent underenheter
-                underenheter = hent_underenheter(søkeord)
-                for underenhet in underenheter:
-                    adresse = underenhet.get("adresse", {})
-                    underenhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
-                    underenhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
-                    underenhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
-
-        return render_template("index.html", hovedenhet=hovedenhet, underenheter=underenheter, søkeord=søkeord)
-
-    return render_template("index.html", hovedenhet=None, underenheter=None)
-
-
+@app.route("/", methods=["POST"])
+def søk():
+    søkeord = request.form["søkeord"]
+    if søkeord.isdigit():
+        enhet = hent_enhet(søkeord)
+        underenheter = hent_underenheter(søkeord)
+        print("DEBUG - Underenheter som sendes til HTML:")
+        print(underenheter)
+        return render_template("index.html", enhet=enhet, underenheter=underenheter)
+    else:
+        resultater = søk_enheter(søkeord)
+        return render_template("index.html", resultater=resultater)
 
 if __name__ == "__main__":
     app.run(debug=True)

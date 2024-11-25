@@ -93,30 +93,32 @@
         {% endif %}
 
         {% if underenheter %}
-            <h2>Underenheter</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Organisasjonsnummer</th>
-                        <th>Navn</th>
-                        <th>Adresse</th>
-                        <th>Postnummer</th>
-                        <th>Sted</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for underenhet in underenheter %}
-                        <tr>
-                            <td>{{ underenhet.organisasjonsnummer }}</td>
-                            <td>{{ underenhet.navn }}</td>
-                            <td>{{ underenhet.adresse_tekst }}</td>
-                            <td>{{ underenhet.postnummer }}</td>
-                            <td>{{ underenhet.poststed }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+<table>
+    <thead>
+        <tr>
+            <th>Organisasjonsnummer</th>
+            <th>Navn</th>
+            <th>Adresse</th>
+            <th>Postnummer</th>
+            <th>Sted</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for underenhet in underenheter %}
+        <tr>
+            <td>{{ underenhet.organisasjonsnummer }}</td>
+            <td>{{ underenhet.navn }}</td>
+            <td>{{ underenhet.adresse_tekst }}</td>
+            <td>{{ underenhet.postnummer }}</td>
+            <td>{{ underenhet.poststed }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Ingen underenheter funnet.</p>
+{% endif %}
+
 
         {% if not hovedenhet and not underenheter and søkeord %}
             <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
