@@ -52,28 +52,28 @@ def søk_enheter(søkeord, maks_resultater=100):
 def index():
     if request.method == "POST":
         søkeord = request.form.get("søkeord", "").strip()
-        resultater = []
+        hovedenhet = None
+        underenheter = []
 
         if søkeord.isdigit():  # Hvis organisasjonsnummer
-            enhet = hent_enhet(søkeord)
-            if enhet:
-                adresse = enhet.get("forretningsadresse", {})
-                enhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
-                enhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
-                enhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
-                resultater.append(enhet)
-        else:  # Hvis firmanavn
-            enheter = søk_enheter(søkeord)
-            for enhet in enheter:
-                adresse = enhet.get("forretningsadresse", {})
-                enhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
-                enhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
-                enhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
-            resultater = enheter
+            hovedenhet = hent_enhet(søkeord)
+            if hovedenhet:
+                adresse = hovedenhet.get("forretningsadresse", {})
+                hovedenhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
+                hovedenhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
+                hovedenhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
 
-        return render_template("index.html", resultater=resultater, søkeord=søkeord)
+                # Hent underenheter
+                underenheter = hent_underenheter(søkeord)
+                for underenhet in underenheter:
+                    adresse = underenhet.get("adresse", {})
+                    underenhet["adresse_tekst"] = formater_adresse(adresse.get("adresse", []))
+                    underenhet["postnummer"] = adresse.get("postnummer", "Ikke oppgitt")
+                    underenhet["poststed"] = adresse.get("poststed", "Ikke oppgitt")
 
-    return render_template("index.html", resultater=None)
+        return render_template("index.html", hovedenhet=hovedenhet, underenheter=underenheter, søkeord=søkeord)
+
+    return render_template("index.html", hovedenhet=None, underenheter=None)
 
 
 

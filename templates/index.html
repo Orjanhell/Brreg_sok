@@ -10,7 +10,7 @@
             margin: 20px;
             background-color: #f9f9f9;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #333;
         }
@@ -68,8 +68,8 @@
         <button type="submit">Søk</button>
     </form>
     <div class="results">
-        {% if resultater %}
-            <h2>Resultater</h2>
+        {% if hovedenhet %}
+            <h2>Hovedenhet</h2>
             <table>
                 <thead>
                     <tr>
@@ -81,19 +81,44 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for firma in resultater %}
+                    <tr>
+                        <td>{{ hovedenhet.organisasjonsnummer }}</td>
+                        <td>{{ hovedenhet.navn }}</td>
+                        <td>{{ hovedenhet.adresse_tekst }}</td>
+                        <td>{{ hovedenhet.postnummer }}</td>
+                        <td>{{ hovedenhet.poststed }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if underenheter %}
+            <h2>Underenheter</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                        <th>Postnummer</th>
+                        <th>Sted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for underenhet in underenheter %}
                         <tr>
-                            <td>{{ firma.organisasjonsnummer }}</td>
-                            <td>{{ firma.navn }}</td>
-                            <td>{{ firma.adresse_tekst }}</td>
-                            <td>{{ firma.postnummer }}</td>
-                            <td>{{ firma.poststed }}</td>
+                            <td>{{ underenhet.organisasjonsnummer }}</td>
+                            <td>{{ underenhet.navn }}</td>
+                            <td>{{ underenhet.adresse_tekst }}</td>
+                            <td>{{ underenhet.postnummer }}</td>
+                            <td>{{ underenhet.poststed }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            
-        {% elif søkeord %}
+        {% endif %}
+
+        {% if not hovedenhet and not underenheter and søkeord %}
             <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
         {% endif %}
     </div>
