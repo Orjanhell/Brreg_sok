@@ -69,7 +69,7 @@
     </form>
     <div class="results">
         {% if enhet %}
-            <h2>Hovedenhet og Underenheter</h2>
+            <h2>Hovedenhet</h2>
             <table>
                 <thead>
                     <tr>
@@ -81,13 +81,28 @@
                 <tbody>
                     <tr>
                         <td>{{ enhet.organisasjonsnummer }}</td>
-                        <td><strong>{{ enhet.navn }}</strong></td>
+                        <td>{{ enhet.navn }}</td>
                         <td>{{ enhet.adresse }}</td>
                     </tr>
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if underenheter %}
+            <h2>Underenheter</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for underenhet in underenheter %}
                     <tr>
                         <td>{{ underenhet.organisasjonsnummer }}</td>
-                        <td>└── {{ underenhet.navn }}</td>
+                        <td>{{ underenhet.navn }}</td>
                         <td>{{ underenhet.adresse }}</td>
                     </tr>
                     {% endfor %}
@@ -117,7 +132,7 @@
             </table>
         {% endif %}
 
-        {% if not enhet and not resultater %}
+        {% if ingen_treff %}
             <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
         {% endif %}
     </div>
