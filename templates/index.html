@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirmaSøk</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> <!-- Koble til CSS-filen -->
+    <meta name="keywords" content="firma søk, organisasjonsnummer, norske bedrifter, bedriftssøk, underenheter">
+<meta name="author" content="Ørjan Helland">
+<meta name="description" content="Søk etter norske bedrifter med FirmaSøk. Finn organisasjonsnummer, navn og adresser enkelt og raskt.">
+
+    <title>FirmaSøk - Søk etter norske bedrifter og organisasjonsnummer</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <h1>FirmaSøk</h1>
+    <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
     <form method="POST">
         <input type="text" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" required>
         <button type="submit">Søk</button>
     </form>
+
     <div class="results">
         {% if søkeord %}
             <h2>Søkeresultater for "{{ søkeord }}"</h2>
@@ -22,8 +27,8 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Organisasjonsnummer</th>
-                        <th>Navn</th>
+                        <th onclick="sortTable('hovedenhet-tabell', 0)">Organisasjonsnummer</th>
+                        <th onclick="sortTable('hovedenhet-tabell', 1)">Navn</th>
                         <th>Adresse</th>
                     </tr>
                 </thead>
@@ -39,11 +44,11 @@
 
         {% if underenheter %}
             <h2>Underenheter</h2>
-            <table>
+            <table id="underenheter-tabell">
                 <thead>
                     <tr>
-                        <th>Organisasjonsnummer</th>
-                        <th>Navn</th>
+                        <th onclick="sortTable('underenheter-tabell', 0)">Organisasjonsnummer</th>
+                        <th onclick="sortTable('underenheter-tabell', 1)">Navn</th>
                         <th>Adresse</th>
                     </tr>
                 </thead>
@@ -61,11 +66,11 @@
 
         {% if resultater %}
             <h2>Søkeresultater</h2>
-            <table>
+            <table id="resultater-tabell">
                 <thead>
                     <tr>
-                        <th>Organisasjonsnummer</th>
-                        <th>Navn</th>
+                        <th onclick="sortTable('resultater-tabell', 0)">Organisasjonsnummer</th>
+                        <th onclick="sortTable('resultater-tabell', 1)">Navn</th>
                         <th>Adresse</th>
                     </tr>
                 </thead>
@@ -85,6 +90,9 @@
             <p class="no-results">{{ feilmelding }}</p>
         {% endif %}
     </div>
+
     <a class="feedback-knapp" href="mailto:orjan.helland@senabeikeland.no?subject=Forbedringer%20Brreg_Søk">Send tilbakemelding</a>
+
+    <script src="/static/js/sortering.js"></script>
 </body>
 </html>
