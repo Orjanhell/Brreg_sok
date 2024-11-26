@@ -68,59 +68,56 @@
         <button type="submit">Søk</button>
     </form>
     <div class="results">
-        {% if hovedenhet %}
-            <h2>Hovedenhet</h2>
+        {% if enhet %}
+            <h2>Hovedenhet og Underenheter</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Organisasjonsnummer</th>
                         <th>Navn</th>
                         <th>Adresse</th>
-                        <th>Postnummer</th>
-                        <th>Sted</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{ hovedenhet.organisasjonsnummer }}</td>
-                        <td>{{ hovedenhet.navn }}</td>
-                        <td>{{ hovedenhet.adresse_tekst }}</td>
-                        <td>{{ hovedenhet.postnummer }}</td>
-                        <td>{{ hovedenhet.poststed }}</td>
+                        <td>{{ enhet.organisasjonsnummer }}</td>
+                        <td><strong>{{ enhet.navn }}</strong></td>
+                        <td>{{ enhet.adresse }}</td>
                     </tr>
+                    {% for underenhet in underenheter %}
+                    <tr>
+                        <td>{{ underenhet.organisasjonsnummer }}</td>
+                        <td>└── {{ underenhet.navn }}</td>
+                        <td>{{ underenhet.adresse }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         {% endif %}
 
-        {% if underenheter %}
-<table>
-    <thead>
-        <tr>
-            <th>Organisasjonsnummer</th>
-            <th>Navn</th>
-            <th>Adresse</th>
-            <th>Postnummer</th>
-            <th>Sted</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for underenhet in underenheter %}
-        <tr>
-            <td>{{ underenhet.organisasjonsnummer }}</td>
-            <td>{{ underenhet.navn }}</td>
-            <td>{{ underenhet.adresse_tekst }}</td>
-            <td>{{ underenhet.postnummer }}</td>
-            <td>{{ underenhet.poststed }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>Ingen underenheter funnet.</p>
-{% endif %}
+        {% if resultater %}
+            <h2>Søkeresultater</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultat in resultater %}
+                    <tr>
+                        <td>{{ resultat.organisasjonsnummer }}</td>
+                        <td>{{ resultat.navn }}</td>
+                        <td>{{ resultat.adresse }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
 
-
-        {% if not hovedenhet and not underenheter and søkeord %}
+        {% if not enhet and not resultater %}
             <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
         {% endif %}
     </div>
