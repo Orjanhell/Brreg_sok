@@ -81,12 +81,11 @@ def søk():
     if søkeord.isdigit():
         enhet = hent_enhet(søkeord)
         underenheter = hent_underenheter(søkeord)
-        print("DEBUG - Underenheter som sendes til HTML:")
-        print(underenheter)
         return render_template("index.html", enhet=enhet, underenheter=underenheter)
     else:
         resultater = søk_enheter(søkeord)
         return render_template("index.html", resultater=resultater)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
