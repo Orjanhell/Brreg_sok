@@ -8,11 +8,16 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f9f9f9;
-        }
-        h1, h2 {
-            text-align: center;
+            background-color: #fafafa;
             color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #efa978;
+        }
+        h2 {
+            text-align: center;
+            color: #e6a475;
         }
         form {
             text-align: center;
@@ -22,18 +27,20 @@
             padding: 10px;
             font-size: 16px;
             width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #007BFF;
+            background-color: #efa978;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #e6a475;
         }
         .results {
             margin: 20px auto;
@@ -47,11 +54,11 @@
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
         }
         th {
-            background-color: #007BFF;
+            background-color: #efa978;
             color: white;
         }
         .no-results {
@@ -132,8 +139,8 @@
             </table>
         {% endif %}
 
-        {% if ingen_treff %}
-            <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
+        {% if feilmelding %}
+            <p class="no-results">{{ feilmelding }}</p>
         {% endif %}
     </div>
 </body>
