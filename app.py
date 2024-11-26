@@ -125,22 +125,23 @@ def søk():
         enhet = hent_enhet(søkeord)
         if enhet:
             underenheter = hent_underenheter(søkeord)
-            return render_template("index.html", enhet=enhet, underenheter=underenheter)
+            return render_template("index.html", enhet=enhet, underenheter=underenheter, søkeord=søkeord)
         else:
             underenhet, hovedenhet = hent_underenhet(søkeord)
             if underenhet:
-                return render_template("index.html", enhet=hovedenhet, underenheter=[underenhet])
+                return render_template("index.html", enhet=hovedenhet, underenheter=[underenhet], søkeord=søkeord)
             else:
-                return render_template("index.html", feilmelding="Ingen treff funnet for organisasjonsnummeret.")
+                return render_template("index.html", feilmelding="Ingen treff funnet for organisasjonsnummeret.", søkeord=søkeord)
     else:  # Hvis søket er et navn
         enheter = søk_enheter(søkeord)
         underenheter = søk_underenheter(søkeord)
         alle_resultater = enheter + underenheter
 
         if alle_resultater:
-            return render_template("index.html", resultater=alle_resultater)
+            return render_template("index.html", resultater=alle_resultater, søkeord=søkeord)
         else:
-            return render_template("index.html", feilmelding="Ingen treff funnet for navnet.")
+            return render_template("index.html", feilmelding="Ingen treff funnet for navnet.", søkeord=søkeord)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
