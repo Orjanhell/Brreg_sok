@@ -39,9 +39,14 @@ def hent_underenhet(orgnummer):
         data = response.json()
         adresse = formater_adresse(data.get("beliggenhetsadresse", {}))
         data["adresse"] = adresse
-        return data
+
+        # Hent hovedenheten hvis tilgjengelig
+        hovedenhet_orgnr = data.get("overordnetEnhet")
+        hovedenhet = hent_enhet(hovedenhet_orgnr) if hovedenhet_orgnr else None
+
+        return data, hovedenhet
     except requests.exceptions.RequestException:
-        return None
+        return None, None
 
 
 def hent_underenheter(orgnummer):
@@ -122,9 +127,9 @@ def søk():
             underenheter = hent_underenheter(søkeord)
             return render_template("index.html", enhet=enhet, underenheter=underenheter)
         else:
-            underenhet = hent_underenhet(søkeord)
+            underenhet, hovedenhet = hent_underenhet(søkeord)
             if underenhet:
-                return render_template("index.html", enhet=None, underenheter=[underenhet])
+                return render_template("index.html", enhet=hovedenhet, underenheter=[underenhet])
             else:
                 return render_template("index.html", feilmelding="Ingen treff funnet for organisasjonsnummeret.")
     else:  # Hvis søket er et navn
