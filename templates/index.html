@@ -8,15 +8,11 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #fafafa;
+            background-color: #f9f9f9;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #efa978;
-        }
-        h2 {
-            color: #e6a475;
-            margin-top: 30px;
         }
         form {
             text-align: center;
@@ -26,8 +22,6 @@
             padding: 10px;
             font-size: 16px;
             width: 300px;
-            border: 2px solid #efa978;
-            border-radius: 5px;
         }
         button {
             padding: 10px 20px;
@@ -40,6 +34,16 @@
         }
         button:hover {
             background-color: #e6a475;
+        }
+        .feedback {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .feedback button {
+            background-color: #f1b68d;
+        }
+        .feedback button:hover {
+            background-color: #efa877;
         }
         .results {
             margin: 20px auto;
@@ -75,9 +79,8 @@
     </form>
     <div class="results">
         {% if søkeord %}
-            <h2>Søkeresultater for "{{ søkeord }}"</h2>
+            <p>Søkeresultater for: <strong>{{ søkeord }}</strong></p>
         {% endif %}
-
         {% if enhet %}
             <h2>Hovedenhet</h2>
             <table>
@@ -145,6 +148,11 @@
         {% if feilmelding %}
             <p class="no-results">{{ feilmelding }}</p>
         {% endif %}
+    </div>
+    <div class="feedback">
+        <button onclick="window.location.href='mailto:orjan.helland@senabeikeland.no?subject=Tilbakemelding%20Brreg_S%C3%B8k'">
+            Gi tilbakemelding
+        </button>
     </div>
 </body>
 </html>
