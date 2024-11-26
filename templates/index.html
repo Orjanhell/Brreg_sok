@@ -4,72 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FirmaSøk</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        h1, h2 {
-            text-align: center;
-            color: #efa978;
-        }
-        form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            padding: 10px;
-            font-size: 16px;
-            width: 300px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #efa978;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #e6a475;
-        }
-        .feedback {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .feedback button {
-            background-color: #f1b68d;
-        }
-        .feedback button:hover {
-            background-color: #efa877;
-        }
-        .results {
-            margin: 20px auto;
-            width: 80%;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #efa978;
-            color: white;
-        }
-        .no-results {
-            text-align: center;
-            font-size: 18px;
-            color: #555;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> <!-- Koble til CSS-filen -->
 </head>
 <body>
     <h1>FirmaSøk</h1>
@@ -79,8 +14,9 @@
     </form>
     <div class="results">
         {% if søkeord %}
-            <p>Søkeresultater for: <strong>{{ søkeord }}</strong></p>
+            <h2>Søkeresultater for "{{ søkeord }}"</h2>
         {% endif %}
+
         {% if enhet %}
             <h2>Hovedenhet</h2>
             <table>
@@ -149,10 +85,6 @@
             <p class="no-results">{{ feilmelding }}</p>
         {% endif %}
     </div>
-    <div class="feedback">
-        <button onclick="window.location.href='mailto:orjan.helland@senabeikeland.no?subject=Tilbakemelding%20Brreg_S%C3%B8k'">
-            Gi tilbakemelding
-        </button>
-    </div>
+    <a class="feedback-knapp" href="mailto:orjan.helland@senabeikeland.no?subject=Forbedringer%20Brreg_Søk">Send tilbakemelding</a>
 </body>
 </html>

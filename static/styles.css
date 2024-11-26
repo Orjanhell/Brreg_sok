@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #E16A03; /* Oransje */
+}
+
+form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Avstand mellom input-felt og knapp */
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    padding: 5px;
+    font-size: 16px;
+    width: 600px;
+    border: 1px solid #ccc;
+    border-radius: 1px;
+    height: 25px; /* Gjør høyden lik som knappen */
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #E16A03; /* Oransje */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    height: 42px; /* Matcher høyden med input */
+}
+
+button:hover {
+    background-color: #cc5903; /* Mørkere oransje ved hover */
+}
+
+.results {
+    margin: 20px auto;
+    width: 80%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #E16A03; /* Oransje */
+    color: white;
+}
+
+.no-results {
+    text-align: center;
+    font-size: 18px;
+    color: #555;
+}
