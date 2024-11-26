@@ -113,6 +113,28 @@ def søk_underenheter(søkeord):
     return resultater
 
 
+def ranger_resultater(søkeord, resultater):
+    """Rangerer resultater basert på relevans til søkeord."""
+    søkeord_lower = søkeord.lower().split()  # Splitt søkeordet i ord for bedre matching
+
+    def relevans_score(resultat):
+        navn = resultat.get("navn", "").lower()
+        navn_ord = navn.split()
+
+        # Eksakt treff gir høyeste score
+        if navn == søkeord.lower():
+            return float("inf")  # Sett høy score for eksakt treff
+
+        # Beregn antall ord i søkeordet som finnes i navnet
+        samsvar = sum(1 for ord in søkeord_lower if ord in navn_ord)
+
+        # Prioriter treff basert på samsvar og lengden på navnet (kortere navn med treff rangeres høyere)
+        return samsvar / len(navn_ord) if navn_ord else 0
+
+    # Sorter resultatene basert på relevans
+    return sorted(resultater, key=relevans_score, reverse=True)
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -121,9 +143,8 @@ def index():
 @app.route("/", methods=["POST"])
 def søk():
     søkeord = request.form["søkeord"].strip()
-    
-    # Hvis søket er et organisasjonsnummer
-    if søkeord.replace(" ", "").isdigit():  
+
+    if søkeord.replace(" ", "").isdigit():  # Hvis søket er et organisasjonsnummer
         søkeord = søkeord.replace(" ", "")  # Fjern mellomrom i organisasjonsnummer
         enhet = hent_enhet(søkeord)
         if enhet:
@@ -135,17 +156,18 @@ def søk():
                 return render_template("index.html", enhet=hovedenhet, underenheter=[underenhet], søkeord=søkeord)
             else:
                 return render_template("index.html", feilmelding="Ingen treff funnet for organisasjonsnummeret.", søkeord=søkeord)
-    else:  
-        # Hvis søket er et navn
+    else:  # Hvis søket er et navn
         enheter = søk_enheter(søkeord)
         underenheter = søk_underenheter(søkeord)
         alle_resultater = enheter + underenheter
 
-        if alle_resultater:
-            return render_template("index.html", resultater=alle_resultater, søkeord=søkeord)
+        # Ranger resultatene basert på relevans
+        rangerte_resultater = ranger_resultater(søkeord, alle_resultater)
+
+        if rangerte_resultater:
+            return render_template("index.html", resultater=rangerte_resultater, søkeord=søkeord)
         else:
             return render_template("index.html", feilmelding="Ingen treff funnet for navnet.", søkeord=søkeord)
-
 
 
 if __name__ == "__main__":
