@@ -13,7 +13,7 @@ def formater_adresse(adresse_data):
     postnummer = adresse_data.get("postnummer", None)
     poststed = adresse_data.get("poststed", None)
 
-    deler = [del for del in [adresse, postnummer, poststed] if del]
+    deler = [element for element in [adresse, postnummer, poststed] if element]
     return ", ".join(deler) if deler else "Ikke oppgitt"
 
 def hent_enhet(orgnummer):
