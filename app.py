@@ -120,8 +120,11 @@ def index():
 
 @app.route("/", methods=["POST"])
 def søk():
-    søkeord = request.form["søkeord"]
-    if søkeord.isdigit():  # Hvis søket er et organisasjonsnummer
+    søkeord = request.form["søkeord"].strip()
+    
+    # Hvis søket er et organisasjonsnummer
+    if søkeord.replace(" ", "").isdigit():  
+        søkeord = søkeord.replace(" ", "")  # Fjern mellomrom i organisasjonsnummer
         enhet = hent_enhet(søkeord)
         if enhet:
             underenheter = hent_underenheter(søkeord)
@@ -132,7 +135,8 @@ def søk():
                 return render_template("index.html", enhet=hovedenhet, underenheter=[underenhet], søkeord=søkeord)
             else:
                 return render_template("index.html", feilmelding="Ingen treff funnet for organisasjonsnummeret.", søkeord=søkeord)
-    else:  # Hvis søket er et navn
+    else:  
+        # Hvis søket er et navn
         enheter = søk_enheter(søkeord)
         underenheter = søk_underenheter(søkeord)
         alle_resultater = enheter + underenheter
@@ -141,6 +145,7 @@ def søk():
             return render_template("index.html", resultater=alle_resultater, søkeord=søkeord)
         else:
             return render_template("index.html", feilmelding="Ingen treff funnet for navnet.", søkeord=søkeord)
+
 
 
 if __name__ == "__main__":
