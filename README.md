@@ -11,6 +11,7 @@ Backend: Flask (Python)
 Frontend: HTML, CSS (tilpasset fargeprofil), JavaScript
 API: Brønnøysundregistrenes Enhetsregister API
 Hosting: Render
+Live versjon av dette prosjektet kan du finne her: https://brreg-sok.onrender.com/
 Hvordan bruke
 Installere avhengigheter:
 
