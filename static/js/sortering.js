@@ -1,3 +1,4 @@
+// Funksjon for å sortere tabeller
 function sortTable(tableId, columnIndex) {
     const table = document.getElementById(tableId);
     const rows = Array.from(table.rows).slice(1); // Exclude header row
@@ -30,10 +31,12 @@ function sortTable(tableId, columnIndex) {
     table.setAttribute("data-sort-column", columnIndex);
     table.setAttribute("data-sort-order", ascending ? "asc" : "desc");
 }
-function søkMedOrgNummer(orgNummer) {
-    const søkefelt = document.querySelector('input[name="søkeord"]');
-    søkefelt.value = orgNummer; // Kopierer orgnummer til søkefeltet
 
-    // Simulerer et søk ved å sende skjemaet automatisk
-    søkefelt.closest('form').submit();
+// Funksjon for å søke med enten organisasjonsnummer eller navn
+function søkMedData(data) {
+    const søkeInput = document.querySelector('input[name="søkeord"]');
+    const søkeForm = søkeInput.closest('form');
+
+    søkeInput.value = data; // Oppdater søkefeltet med data (org.nr eller navn)
+    søkeForm.submit(); // Send skjemaet
 }

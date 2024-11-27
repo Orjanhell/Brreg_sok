@@ -1,84 +1,119 @@
+/* Generelt */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f9f9f9;
+    font-size: 14px;
 }
 
 h1, h2 {
     text-align: center;
-    color: #E16A03; /* Oransje */
+    color: #E16A03;
 }
 
+/* Søkeform */
 form {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* Avstand mellom input-felt og knapp */
+    gap: 10px;
     margin-bottom: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
 }
 
 input[type="text"] {
-    padding: 5px;
+    padding: 8px;
     font-size: 16px;
-    width: 600px;
+    width: 100%;
     border: 1px solid #ccc;
-    border-radius: 1px;
-    height: 25px; /* Gjør høyden lik som knappen */
+    border-radius: 5px;
 }
 
 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #E16A03; /* Oransje */
+    background-color: #E16A03;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    height: 42px; /* Matcher høyden med input */
 }
 
 button:hover {
-    background-color: #cc5903; /* Mørkere oransje ved hover */
+    background-color: #cc5903;
 }
 
-.results {
-    margin: 20px auto;
-    width: 80%;
-}
-
+/* Tabell-layout */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background-color: #fff;
 }
 
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    white-space: normal;
+    word-wrap: break-word;
+    vertical-align: top;
 }
 
 th {
-    background-color: #E16A03; /* Oransje */
+    background-color: #E16A03;
     color: white;
 }
 
+/* Gruppeoverskrift */
+.gruppe-header {
+    background-color: #f3f3f3;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Feilmelding */
 .no-results {
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     color: #555;
 }
+
+/* Informasjonstekst */
+.info-tekst {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Klikkbare elementer */
+.klikkbart {
+    cursor: pointer; /* Beholder klikkbarhet */
+    color: inherit; /* Bruker standard tekstfarge */
+    text-decoration: none; /* Ingen understrekning */
+    font-weight: normal; /* Valgfri: kan bruke bold hvis ønsket */
+}
+
+.klikkbart:hover {
+    color: #E16A03; /* Valgfri hover-effekt */
+    text-decoration: none; /* Ingen understrekning ved hover */
+}
+
+
+/* Feedback-knapp */
 .feedback-knapp {
     position: fixed;
     bottom: 20px;
     right: 20px;
     background-color: #E16A03;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px;
     text-decoration: none;
     text-align: center;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -91,25 +126,28 @@ th {
     text-decoration: none;
 }
 
+/* Mobilvennlighet */
+@media (max-width: 768px) {
+    body {
+        margin: 10px;
+        font-size: 13px;
+    }
 
-.sorterings-container {
-    text-align: center;
-    margin: 10px 0;
-}
+    h1, h2 {
+        font-size: 18px;
+    }
 
-.sorterings-container select {
-    padding: 5px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
+    form {
+        flex-direction: column;
+        gap: 5px;
+    }
 
-.klikkbart {
-    cursor: pointer;
-    color: #E16A03;
-    text-decoration: underline;
-}
+    input[type="text"], button {
+        width: 100%;
+    }
 
-.klikkbart:hover {
-    color: #cc5903; /* Mørkere oransje ved hover */
+    table {
+        font-size: 12px;
+        overflow-x: auto;
+    }
 }

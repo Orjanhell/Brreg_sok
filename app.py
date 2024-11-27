@@ -7,7 +7,6 @@ app = Flask(__name__)
 API_BASE_URL = "https://data.brreg.no/enhetsregisteret/api/enheter"
 API_UNDERENHETER_URL = "https://data.brreg.no/enhetsregisteret/api/underenheter"
 
-
 def formater_adresse(adresse_data):
     """Formaterer adressefeltet for visning."""
     adresse = ", ".join(adresse_data.get("adresse", [])) if "adresse" in adresse_data else None
@@ -16,7 +15,6 @@ def formater_adresse(adresse_data):
 
     deler = [adresse, f"{postnummer} {poststed}".strip() if postnummer or poststed else None]
     return ", ".join(filter(None, deler)) if deler else "Ikke oppgitt"
-
 
 def hent_enhet(orgnummer):
     """Hent detaljer om en spesifikk enhet."""
@@ -29,7 +27,6 @@ def hent_enhet(orgnummer):
         return data
     except requests.exceptions.RequestException:
         return None
-
 
 def hent_underenhet(orgnummer):
     """Hent detaljer om en spesifikk underenhet."""
@@ -48,12 +45,11 @@ def hent_underenhet(orgnummer):
     except requests.exceptions.RequestException:
         return None, None
 
-
 def hent_underenheter(orgnummer):
     """Hent alle underenheter for en spesifikk enhet."""
     underenheter = []
     try:
-        params = {"overordnetEnhet": orgnummer, "size": 100}
+        params = {"overordnetEnhet": orgnummer, "size": 150}
         response = requests.get(API_UNDERENHETER_URL, params=params)
         response.raise_for_status()
         data = response.json()
@@ -70,12 +66,11 @@ def hent_underenheter(orgnummer):
         pass
     return underenheter
 
-
 def søk_enheter(søkeord):
     """Søk etter firma basert på navn."""
     resultater = []
     try:
-        params = {"navn": søkeord, "size": 20}
+        params = {"navn": søkeord, "size": 150}
         response = requests.get(API_BASE_URL, params=params)
         response.raise_for_status()
         data = response.json()
@@ -91,12 +86,11 @@ def søk_enheter(søkeord):
         pass
     return resultater
 
-
 def søk_underenheter(søkeord):
     """Søk etter underenheter basert på navn."""
     resultater = []
     try:
-        params = {"navn": søkeord, "size": 20}
+        params = {"navn": søkeord, "size": 150}
         response = requests.get(API_UNDERENHETER_URL, params=params)
         response.raise_for_status()
         data = response.json()
@@ -112,63 +106,102 @@ def søk_underenheter(søkeord):
         pass
     return resultater
 
+def filtrer_relevante_resultater(søkeord, resultater):
+    """Filtrer resultater basert på samsvar mellom søkeord og resultatnavn."""
+    søkeord_liste = søkeord.lower().split()  # Del opp søkeordet i ord
+    relevante_resultater = []
 
-def ranger_resultater(søkeord, resultater):
-    """Rangerer resultater basert på relevans til søkeord."""
-    søkeord_lower = søkeord.lower().split()  # Splitt søkeordet i ord for bedre matching
-
-    def relevans_score(resultat):
+    for resultat in resultater:
         navn = resultat.get("navn", "").lower()
         navn_ord = navn.split()
 
-        # Eksakt treff gir høyeste score
-        if navn == søkeord.lower():
-            return float("inf")  # Sett høy score for eksakt treff
+        # Tell antall ord som matcher mellom søkeord og navnet
+        samsvar = sum(1 for ord in søkeord_liste if ord in navn_ord)
 
-        # Beregn antall ord i søkeordet som finnes i navnet
-        samsvar = sum(1 for ord in søkeord_lower if ord in navn_ord)
+        # Definer dynamisk samsvarskrav
+        if len(søkeord_liste) >= 4 and samsvar >= 3:  # 3 av 4 eller flere
+            relevante_resultater.append(resultat)
+        elif len(søkeord_liste) == 3 and samsvar >= 2:  # 2 av 3
+            relevante_resultater.append(resultat)
+        elif len(søkeord_liste) == 2 and samsvar == 2:  # 2 av 2
+            relevante_resultater.append(resultat)
+        elif len(søkeord_liste) == 1 and samsvar >= 1:  # 1 av 1
+            relevante_resultater.append(resultat)
 
-        # Prioriter treff basert på samsvar og lengden på navnet (kortere navn med treff rangeres høyere)
-        return samsvar / len(navn_ord) if navn_ord else 0
+    return relevante_resultater
 
-    # Sorter resultatene basert på relevans
-    return sorted(resultater, key=relevans_score, reverse=True)
+
+def søk_enheter_og_underenheter(søkeord):
+    """Kombinerer resultater fra hovedenheter og underenheter basert på navn."""
+    hovedenheter = søk_enheter(søkeord)
+    underenheter = søk_underenheter(søkeord)
+
+    # Filtrer resultatene basert på relevans
+    hovedenheter = filtrer_relevante_resultater(søkeord, hovedenheter)
+    underenheter = filtrer_relevante_resultater(søkeord, underenheter)
+
+    return hovedenheter, underenheter
+
+
+@app.route("/", methods=["GET", "POST"])
+def søk():
+    if request.method == "POST":
+        søkeord = request.form["søkeord"].strip()
+
+        if søkeord:  # Sjekk om søkeordet ikke er tomt
+            if søkeord.replace(" ", "").isdigit():  # Hvis søket er et organisasjonsnummer
+                søkeord = søkeord.replace(" ", "")
+                enhet = hent_enhet(søkeord)
+                if enhet:
+                    underenheter = hent_underenheter(søkeord)
+                    return render_template(
+                        "index.html",
+                        hovedenheter=[enhet],
+                        underenheter=underenheter,
+                        søkeord=søkeord,
+                    )
+                else:
+                    underenhet, hovedenhet = hent_underenhet(søkeord)
+                    if underenhet:
+                        return render_template(
+                            "index.html",
+                            hovedenheter=[hovedenhet] if hovedenhet else [],
+                            underenheter=[underenhet],
+                            søkeord=søkeord,
+                        )
+                    else:
+                        return render_template(
+                            "index.html",
+                            feilmelding="Ingen treff funnet for organisasjonsnummeret.",
+                            søkeord=søkeord,
+                        )
+            else:  # Hvis søket er et navn
+                hovedenheter, underenheter = søk_enheter_og_underenheter(søkeord)
+
+                if not hovedenheter and not underenheter:
+                    return render_template(
+                        "index.html",
+                        feilmelding="Ingen treff funnet for navnet.",
+                        søkeord=søkeord,
+                    )
+
+                return render_template(
+                    "index.html",
+                    hovedenheter=hovedenheter,
+                    underenheter=underenheter,
+                    søkeord=søkeord,
+                )
+
+        # Hvis søkeord er tomt, bare vis startsiden
+        return render_template("index.html")
+
+    # GET-forespørsel: Bare vis startsiden
+    return render_template("index.html")
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
-
-@app.route("/", methods=["POST"])
-def søk():
-    søkeord = request.form["søkeord"].strip()
-
-    if søkeord.replace(" ", "").isdigit():  # Hvis søket er et organisasjonsnummer
-        søkeord = søkeord.replace(" ", "")  # Fjern mellomrom i organisasjonsnummer
-        enhet = hent_enhet(søkeord)
-        if enhet:
-            underenheter = hent_underenheter(søkeord)
-            return render_template("index.html", enhet=enhet, underenheter=underenheter, søkeord=søkeord)
-        else:
-            underenhet, hovedenhet = hent_underenhet(søkeord)
-            if underenhet:
-                return render_template("index.html", enhet=hovedenhet, underenheter=[underenhet], søkeord=søkeord)
-            else:
-                return render_template("index.html", feilmelding="Ingen treff funnet for organisasjonsnummeret.", søkeord=søkeord)
-    else:  # Hvis søket er et navn
-        enheter = søk_enheter(søkeord)
-        underenheter = søk_underenheter(søkeord)
-        alle_resultater = enheter + underenheter
-
-        # Ranger resultatene basert på relevans
-        rangerte_resultater = ranger_resultater(søkeord, alle_resultater)
-
-        if rangerte_resultater:
-            return render_template("index.html", resultater=rangerte_resultater, søkeord=søkeord)
-        else:
-            return render_template("index.html", feilmelding="Ingen treff funnet for navnet.", søkeord=søkeord)
-
 
 if __name__ == "__main__":
     app.run(debug=True)

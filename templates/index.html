@@ -6,93 +6,88 @@
     <meta name="keywords" content="firma søk, organisasjonsnummer, norske bedrifter, bedriftssøk, underenheter">
     <meta name="author" content="Ørjan Helland">
     <meta name="description" content="Søk etter norske bedrifter med FirmaSøk. Finn organisasjonsnummer, navn og adresser enkelt og raskt.">
-
     <title>FirmaSøk - Søk etter norske bedrifter og organisasjonsnummer</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
     <form method="POST">
-        <input type="text" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" value="{{ søkeord }}" required>
+        <input 
+            type="text" 
+            name="søkeord" 
+            id="søkeord" 
+            placeholder="Angi firmanavn eller organisasjonsnummer" 
+            value="{{ 'Søkeresultater for ' + søkeord if søkeord else '' }}" 
+            onfocus="fjernPrefiks()" 
+            onblur="leggTilPrefiks()" 
+            required>
         <button type="submit">Søk</button>
     </form>
 
     <div class="results">
-        {% if søkeord %}
-            <h2>Søkeresultater for "{{ søkeord }}"</h2>
-        {% endif %}
-
-        {% if enhet %}
-            <h2>Hovedenhet</h2>
+        {% if hovedenheter or underenheter %}
+            <h2>Alle treff</h2>
             <table>
                 <thead>
                     <tr>
-                        <th onclick="sortTable('hovedenhet-tabell', 0)">Organisasjonsnummer</th>
-                        <th onclick="sortTable('hovedenhet-tabell', 1)">Navn</th>
+                        <th>Type</th>
+                        <th>Org.nr</th>
+                        <th>Navn</th>
                         <th>Adresse</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td onclick="søkMedOrgNummer('{{ enhet.organisasjonsnummer }}')" class="klikkbart">{{ enhet.organisasjonsnummer }}</td>
-                        <td>{{ enhet.navn }}</td>
-                        <td>{{ enhet.adresse }}</td>
+                    {% if hovedenheter %}
+                    <tr class="gruppe-header">
+                        <td colspan="4">Hovedenheter</td>
                     </tr>
-                </tbody>
-            </table>
-        {% endif %}
+                    {% for hovedenhet in hovedenheter %}
+                    <tr>
+                        <td>Hovedenhet</td>
+                        <td>{{ hovedenhet.organisasjonsnummer }}</td>
+                        <td>{{ hovedenhet.navn }}</td>
+                        <td>{{ hovedenhet.adresse }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
 
-        {% if underenheter %}
-            <h2>Underenheter</h2>
-            <table id="underenheter-tabell">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable('underenheter-tabell', 0)">Organisasjonsnummer</th>
-                        <th onclick="sortTable('underenheter-tabell', 1)">Navn</th>
-                        <th>Adresse</th>
+                    {% if underenheter %}
+                    <tr class="gruppe-header">
+                        <td colspan="4">Underenheter</td>
                     </tr>
-                </thead>
-                <tbody>
                     {% for underenhet in underenheter %}
                     <tr>
-                        <td onclick="søkMedOrgNummer('{{ underenhet.organisasjonsnummer }}')" class="klikkbart">{{ underenhet.organisasjonsnummer }}</td>
+                        <td>Underenhet</td>
+                        <td>{{ underenhet.organisasjonsnummer }}</td>
                         <td>{{ underenhet.navn }}</td>
                         <td>{{ underenhet.adresse }}</td>
                     </tr>
                     {% endfor %}
+                    {% endif %}
                 </tbody>
             </table>
-        {% endif %}
-
-        {% if resultater %}
-            <h2>Søkeresultater</h2>
-            <table id="resultater-tabell">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable('resultater-tabell', 0)">Organisasjonsnummer</th>
-                        <th onclick="sortTable('resultater-tabell', 1)">Navn</th>
-                        <th>Adresse</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for resultat in resultater %}
-                    <tr>
-                        <td onclick="søkMedOrgNummer('{{ resultat.organisasjonsnummer }}')" class="klikkbart">{{ resultat.organisasjonsnummer }}</td>
-                        <td>{{ resultat.navn }}</td>
-                        <td>{{ resultat.adresse }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-
-        {% if feilmelding %}
+        {% elif feilmelding %}
             <p class="no-results">{{ feilmelding }}</p>
         {% endif %}
     </div>
 
     <a class="feedback-knapp" href="mailto:orjan.helland@senabeikeland.no?subject=Forbedringer%20Brreg_Søk">Send tilbakemelding</a>
 
-    <script src="/static/js/sortering.js"></script>
+    <script>
+        const søkeordInput = document.getElementById('søkeord');
+        const søkeordOriginal = "{{ søkeord }}"; // Hent original søkeord
+
+        function fjernPrefiks() {
+            if (søkeordInput.value.startsWith("Søkeresultater for")) {
+                søkeordInput.value = søkeordOriginal; // Fjern "Søkeresultater for"
+            }
+        }
+
+        function leggTilPrefiks() {
+            if (søkeordInput.value.trim() === søkeordOriginal) {
+                søkeordInput.value = "Søkeresultater for " + søkeordOriginal; // Legg til "Søkeresultater for"
+            }
+        }
+    </script>
 </body>
 </html>
