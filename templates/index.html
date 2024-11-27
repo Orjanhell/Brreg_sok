@@ -11,7 +11,7 @@
 </head>
 <body>
     <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
-    <form method="POST">
+    <form method="POST" onsubmit="fjernPrefiksFørSend()">
         <input 
             type="text" 
             name="søkeord" 
@@ -44,8 +44,8 @@
                     {% for hovedenhet in hovedenheter %}
                     <tr>
                         <td>Hovedenhet</td>
-                        <td>{{ hovedenhet.organisasjonsnummer }}</td>
-                        <td>{{ hovedenhet.navn }}</td>
+                        <td ondblclick="søkMedData('{{ hovedenhet.organisasjonsnummer }}')" class="klikkbart">{{ hovedenhet.organisasjonsnummer }}</td>
+                        <td ondblclick="søkMedData('{{ hovedenhet.navn }}')" class="klikkbart">{{ hovedenhet.navn }}</td>
                         <td>{{ hovedenhet.adresse }}</td>
                     </tr>
                     {% endfor %}
@@ -58,8 +58,8 @@
                     {% for underenhet in underenheter %}
                     <tr>
                         <td>Underenhet</td>
-                        <td>{{ underenhet.organisasjonsnummer }}</td>
-                        <td>{{ underenhet.navn }}</td>
+                        <td ondblclick="søkMedData('{{ underenhet.organisasjonsnummer }}')" class="klikkbart">{{ underenhet.organisasjonsnummer }}</td>
+                        <td ondblclick="søkMedData('{{ underenhet.navn }}')" class="klikkbart">{{ underenhet.navn }}</td>
                         <td>{{ underenhet.adresse }}</td>
                     </tr>
                     {% endfor %}
@@ -86,6 +86,20 @@
         function leggTilPrefiks() {
             if (søkeordInput.value.trim() === søkeordOriginal) {
                 søkeordInput.value = "Søkeresultater for " + søkeordOriginal; // Legg til "Søkeresultater for"
+            }
+        }
+
+        function søkMedData(data) {
+            const søkeInput = document.querySelector('input[name="søkeord"]');
+            const søkeForm = søkeInput.closest('form');
+
+            søkeInput.value = data; // Oppdater søkefeltet med data (org.nr eller navn)
+            søkeForm.submit(); // Send skjemaet
+        }
+
+        function fjernPrefiksFørSend() {
+            if (søkeordInput.value.startsWith("Søkeresultater for")) {
+                søkeordInput.value = søkeordOriginal; // Fjern prefikset før skjema sendes
             }
         }
     </script>
