@@ -4,6 +4,7 @@
 - Vise postadresse dersom kunden ikke har forretningsadresse eller beliggenhetsadresse.
 - Inkludere om kunden er registrert med EHF, for eksempel via ELMA/Peppol.
 - Klikk på kundenavnet for å utvide visningen med mer informasjon om kunden.
+- Oppdatere til en mobilvennlig versjon av nettsiden
 
 ### Funksjonalitet som er fullført (Live-versjon):
 - Søkeordet forblir i søkefeltet etter søk. ✅
