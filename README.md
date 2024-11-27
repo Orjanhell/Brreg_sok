@@ -39,7 +39,6 @@ Søke:
 
 Skriv inn firmanavn eller organisasjonsnummer i søkefeltet.
 Trykk på "Søk" for å vise resultatene.
-EHF-fakturamottak:
 
 Bidrag
 Har du forslag til forbedringer? Send gjerne en e-post via "Send tilbakemelding"-knappen i applikasjonen, eller opprett en GitHub Issue.
