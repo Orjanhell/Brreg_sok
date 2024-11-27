@@ -31,10 +31,5 @@ EHF-fakturamottak:
 Bidrag
 Har du forslag til forbedringer? Send gjerne en e-post via "Send tilbakemelding"-knappen i applikasjonen, eller opprett en GitHub Issue.
 
-Skjermbilder
-Hovedside
-
-Søkeresultater
-
 Lisens
 Dette prosjektet er lisensiert under MIT-lisensen. Se LICENSE-filen for detaljer.
