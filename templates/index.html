@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="keywords" content="firma søk, organisasjonsnummer, norske bedrifter, bedriftssøk, underenheter">
-<meta name="author" content="Ørjan Helland">
-<meta name="description" content="Søk etter norske bedrifter med FirmaSøk. Finn organisasjonsnummer, navn og adresser enkelt og raskt.">
+    <meta name="author" content="Ørjan Helland">
+    <meta name="description" content="Søk etter norske bedrifter med FirmaSøk. Finn organisasjonsnummer, navn og adresser enkelt og raskt.">
 
     <title>FirmaSøk - Søk etter norske bedrifter og organisasjonsnummer</title>
     <link rel="stylesheet" href="/static/css/styles.css">
@@ -13,7 +13,7 @@
 <body>
     <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
     <form method="POST">
-        <input type="text" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" required>
+        <input type="text" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" value="{{ søkeord }}" required>
         <button type="submit">Søk</button>
     </form>
 
@@ -34,7 +34,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{ enhet.organisasjonsnummer }}</td>
+                        <td onclick="søkMedOrgNummer('{{ enhet.organisasjonsnummer }}')" class="klikkbart">{{ enhet.organisasjonsnummer }}</td>
                         <td>{{ enhet.navn }}</td>
                         <td>{{ enhet.adresse }}</td>
                     </tr>
@@ -55,7 +55,7 @@
                 <tbody>
                     {% for underenhet in underenheter %}
                     <tr>
-                        <td>{{ underenhet.organisasjonsnummer }}</td>
+                        <td onclick="søkMedOrgNummer('{{ underenhet.organisasjonsnummer }}')" class="klikkbart">{{ underenhet.organisasjonsnummer }}</td>
                         <td>{{ underenhet.navn }}</td>
                         <td>{{ underenhet.adresse }}</td>
                     </tr>
@@ -77,7 +77,7 @@
                 <tbody>
                     {% for resultat in resultater %}
                     <tr>
-                        <td>{{ resultat.organisasjonsnummer }}</td>
+                        <td onclick="søkMedOrgNummer('{{ resultat.organisasjonsnummer }}')" class="klikkbart">{{ resultat.organisasjonsnummer }}</td>
                         <td>{{ resultat.navn }}</td>
                         <td>{{ resultat.adresse }}</td>
                     </tr>

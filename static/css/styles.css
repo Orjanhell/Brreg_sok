@@ -103,3 +103,13 @@ th {
     border-radius: 5px;
     border: 1px solid #ccc;
 }
+
+.klikkbart {
+    cursor: pointer;
+    color: #E16A03;
+    text-decoration: underline;
+}
+
+.klikkbart:hover {
+    color: #cc5903; /* Mørkere oransje ved hover */
+}

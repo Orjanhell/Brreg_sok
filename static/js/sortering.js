@@ -30,3 +30,10 @@ function sortTable(tableId, columnIndex) {
     table.setAttribute("data-sort-column", columnIndex);
     table.setAttribute("data-sort-order", ascending ? "asc" : "desc");
 }
+function søkMedOrgNummer(orgNummer) {
+    const søkefelt = document.querySelector('input[name="søkeord"]');
+    søkefelt.value = orgNummer; // Kopierer orgnummer til søkefeltet
+
+    // Simulerer et søk ved å sende skjemaet automatisk
+    søkefelt.closest('form').submit();
+}
