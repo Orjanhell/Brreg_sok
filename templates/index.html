@@ -1,106 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="firma søk, organisasjonsnummer, norske bedrifter, bedriftssøk, underenheter">
-    <meta name="author" content="Ørjan Helland">
-    <meta name="description" content="Søk etter norske bedrifter med FirmaSøk. Finn organisasjonsnummer, navn og adresser enkelt og raskt.">
-    <title>FirmaSøk - Søk etter norske bedrifter og organisasjonsnummer</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>FirmaSøk - Søk etter norske bedrifter og organisasjoner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
-    <form method="POST" onsubmit="fjernPrefiksFørSend()">
-        <input 
-            type="text" 
-            name="søkeord" 
-            id="søkeord" 
-            placeholder="Angi firmanavn eller organisasjonsnummer" 
-            value="{{ 'Søkeresultater for ' + søkeord if søkeord else '' }}" 
-            onfocus="fjernPrefiks()" 
-            onblur="leggTilPrefiks()" 
-            required>
+    <form method="POST">
+        <input type="text" id="søkeord" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" value="{{ søkeord or '' }}" required>
         <button type="submit">Søk</button>
     </form>
 
     <div class="results">
-        {% if hovedenheter or underenheter %}
-            <h2>Alle treff</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Org.nr</th>
-                        <th>Navn</th>
-                        <th>Adresse</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if hovedenheter %}
-                    <tr class="gruppe-header">
-                        <td colspan="4">Hovedenheter</td>
-                    </tr>
-                    {% for hovedenhet in hovedenheter %}
-                    <tr>
-                        <td>Hovedenhet</td>
-                        <td ondblclick="søkMedData('{{ hovedenhet.organisasjonsnummer }}')" class="klikkbart">{{ hovedenhet.organisasjonsnummer }}</td>
-                        <td ondblclick="søkMedData('{{ hovedenhet.navn }}')" class="klikkbart">{{ hovedenhet.navn }}</td>
-                        <td>{{ hovedenhet.adresse }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% endif %}
-
-                    {% if underenheter %}
-                    <tr class="gruppe-header">
-                        <td colspan="4">Underenheter</td>
-                    </tr>
-                    {% for underenhet in underenheter %}
-                    <tr>
-                        <td>Underenhet</td>
-                        <td ondblclick="søkMedData('{{ underenhet.organisasjonsnummer }}')" class="klikkbart">{{ underenhet.organisasjonsnummer }}</td>
-                        <td ondblclick="søkMedData('{{ underenhet.navn }}')" class="klikkbart">{{ underenhet.navn }}</td>
-                        <td>{{ underenhet.adresse }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% endif %}
-                </tbody>
-            </table>
-        {% elif feilmelding %}
+        {% if feilmelding %}
             <p class="no-results">{{ feilmelding }}</p>
+        {% elif søkeord %}
+            <h2>Søkeresultater for "{{ søkeord }}"</h2>
+
+            {% if hovedenheter or underenheter %}
+                <table id="resultater-tabell">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Org.Nr</th>
+                            <th>Navn</th>
+                            <th>Adresse</th>
+                            <th>EHF</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Hovedenheter -->
+                        {% if hovedenheter %}
+                        <tr class="gruppe-header">
+                            <td colspan="5">Hovedenheter</td>
+                        </tr>
+                        {% for hovedenhet in hovedenheter %}
+                        <tr>
+                            <td>Hovedenhet</td>
+                            <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">{{ hovedenhet.organisasjonsnummer }}</td>
+                            <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
+                            <td>{{ hovedenhet.adresse }}</td>
+                            <td>
+                                <span class="ehf-status gul" data-orgnummer="{{ hovedenhet.organisasjonsnummer }}"></span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    
+                        <!-- Underenheter -->
+                        {% if underenheter %}
+                        <tr class="gruppe-header">
+                            <td colspan="5">Underenheter</td>
+                        </tr>
+                        {% for underenhet in underenheter %}
+                        <tr>
+                            <td>Underenhet</td>
+                            <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
+                            <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
+                            <td>{{ underenhet.adresse }}</td>
+                            <td>
+                                <span class="ehf-status gul" data-orgnummer="{{ underenhet.organisasjonsnummer }}"></span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
+            {% endif %}
         {% endif %}
     </div>
 
-    <a class="feedback-knapp" href="mailto:orjan.helland@senabeikeland.no?subject=Forbedringer%20Brreg_Søk">Send tilbakemelding</a>
-
+    <script src="{{ url_for('static', filename='js/sortering.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ehf.js') }}"></script>
     <script>
-        const søkeordInput = document.getElementById('søkeord');
-        const søkeordOriginal = "{{ søkeord }}"; // Hent original søkeord
-
-        function fjernPrefiks() {
-            if (søkeordInput.value.startsWith("Søkeresultater for")) {
-                søkeordInput.value = søkeordOriginal; // Fjern "Søkeresultater for"
-            }
+        function søkPåOrgNr(orgNr) {
+            const søkefelt = document.getElementById('søkeord');
+            søkefelt.value = orgNr;
+            søkefelt.form.submit();
         }
 
-        function leggTilPrefiks() {
-            if (søkeordInput.value.trim() === søkeordOriginal) {
-                søkeordInput.value = "Søkeresultater for " + søkeordOriginal; // Legg til "Søkeresultater for"
-            }
-        }
-
-        function søkMedData(data) {
-            const søkeInput = document.querySelector('input[name="søkeord"]');
-            const søkeForm = søkeInput.closest('form');
-
-            søkeInput.value = data; // Oppdater søkefeltet med data (org.nr eller navn)
-            søkeForm.submit(); // Send skjemaet
-        }
-
-        function fjernPrefiksFørSend() {
-            if (søkeordInput.value.startsWith("Søkeresultater for")) {
-                søkeordInput.value = søkeordOriginal; // Fjern prefikset før skjema sendes
-            }
+        function søkPåNavn(navn) {
+            const søkefelt = document.getElementById('søkeord');
+            søkefelt.value = navn;
+            søkefelt.form.submit();
         }
     </script>
 </body>

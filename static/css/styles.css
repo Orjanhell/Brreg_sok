@@ -1,34 +1,31 @@
-/* Generelt */
+/* ---------- Grunnleggende stiler ---------- */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f9f9f9;
-    font-size: 14px;
 }
 
 h1, h2 {
     text-align: center;
-    color: #E16A03;
+    color: #E16A03; /* Oransje */
 }
 
-/* Søkeform */
 form {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
 }
 
 input[type="text"] {
-    padding: 8px;
+    padding: 5px;
     font-size: 16px;
     width: 100%;
+    max-width: 600px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    height: 42px;
 }
 
 button {
@@ -39,115 +36,161 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #cc5903;
+    background-color: #cc5903; /* Mørkere oransje */
 }
 
-/* Tabell-layout */
+/* ---------- Resultatseksjon ---------- */
+.results {
+    margin: 20px auto;
+    width: 90%;
+}
+
+.no-results {
+    text-align: center;
+    font-size: 18px;
+    color: #F44336; /* Rød */
+}
+
+/* ---------- Tabellstiler ---------- */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: #fff;
 }
 
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-    white-space: normal;
-    word-wrap: break-word;
-    vertical-align: top;
+}
+
+table th:first-child,
+table td:first-child {
+    width: 15%;
+    text-align: left;
 }
 
 th {
     background-color: #E16A03;
     color: white;
-}
-
-/* Gruppeoverskrift */
-.gruppe-header {
-    background-color: #f3f3f3;
-    font-weight: bold;
-    text-align: center;
-    border-bottom: 2px solid #ddd;
-}
-
-/* Feilmelding */
-.no-results {
-    text-align: center;
-    font-size: 16px;
-    color: #555;
-}
-
-/* Informasjonstekst */
-.info-tekst {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-/* Klikkbare elementer */
-.klikkbart {
-    cursor: pointer; /* Beholder klikkbarhet */
-    color: inherit; /* Bruker standard tekstfarge */
-    text-decoration: none; /* Ingen understrekning */
-    font-weight: normal; /* Valgfri: kan bruke bold hvis ønsket */
-}
-
-.klikkbart:hover {
-    color: #E16A03; /* Valgfri hover-effekt */
-    text-decoration: none; /* Ingen understrekning ved hover */
-}
-
-
-/* Feedback-knapp */
-.feedback-knapp {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #E16A03;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    text-decoration: none;
-    text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
+}
+
+th:hover {
+    background-color: #cc5903;
+}
+
+td {
+    vertical-align: middle;
+}
+
+table tbody tr {
+    background-color: transparent;
     transition: background-color 0.3s ease;
 }
 
-.feedback-knapp:hover {
-    background-color: #b45602;
-    text-decoration: none;
+table tbody tr:hover {
+    background-color: #f2f2f2;
 }
 
-/* Mobilvennlighet */
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* ---------- EHF-status indikatorer ---------- */
+.ehf-status {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.ehf-status.grønn {
+    background-color: #4CAF50; /* Grønn */
+}
+
+.ehf-status.rød {
+    background-color: #F44336; /* Rød */
+}
+
+.ehf-status.gul {
+    background-color: #FFC107; /* Gul */
+    animation: puls 1s infinite;
+}
+
+/* Spinner for lastingsindikator */
+@keyframes puls {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.ehf-status.spinner {
+    animation: puls 1s infinite;
+}
+
+/* ---------- Interaktivitet ---------- */
+td[ondblclick] {
+    cursor: pointer;
+}
+
+td[ondblclick]:hover {
+    background-color: #f1f1f1;
+}
+
+/* ---------- Gruppeheader ---------- */
+.gruppe-header {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: left;
+    font-size: 16px;
+    color: #E16A03; /* Oransje tekst */
+}
+
+.gruppe-header td {
+    padding: 10px;
+    border: none;
+}
+
+/* ---------- Tilgjengelighet ---------- */
+button:focus,
+input[type="text"]:focus,
+td[ondblclick]:focus {
+    outline: 2px solid #E16A03;
+}
+
+/* ---------- Responsivt design ---------- */
 @media (max-width: 768px) {
     body {
         margin: 10px;
-        font-size: 13px;
     }
 
-    h1, h2 {
-        font-size: 18px;
-    }
-
-    form {
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    input[type="text"], button {
+    input[type="text"] {
         width: 100%;
     }
 
-    table {
-        font-size: 12px;
-        overflow-x: auto;
+    .results {
+        width: 100%;
+    }
+
+    table, th, td {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 6px;
     }
 }
