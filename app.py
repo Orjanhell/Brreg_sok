@@ -107,11 +107,22 @@ def søk():
                         søkeord=søkeord,
                     )
                 else:
-                    return render_template(
-                        "index.html",
-                        feilmelding="Ingen treff funnet for organisasjonsnummeret.",
-                        søkeord=søkeord,
-                    )
+                    # Hvis ikke funnet i hovedenheter, prøv å søke i underenheter
+                    enhet = hent_enhet_fra_underenheter(søkeord)
+                    if enhet:
+                        underenheter = hent_underenheter(søkeord)
+                        return render_template(
+                            "index.html",
+                            hovedenheter=[enhet],
+                            underenheter=underenheter,
+                            søkeord=søkeord,
+                        )
+                    else:
+                        return render_template(
+                            "index.html",
+                            feilmelding="Ingen treff funnet for organisasjonsnummeret.",
+                            søkeord=søkeord,
+                        )
             else:
                 hovedenheter, underenheter = søk_enheter_og_underenheter(søkeord)
 
@@ -142,8 +153,9 @@ def ehf_status(orgnummer):
 
 
 def hent_enhet(orgnummer):
-    """Hent detaljer om en spesifikk enhet uten å hente EHF-status."""
+    """Hent detaljer om en spesifikk enhet eller underenhet uten å hente EHF-status."""
     try:
+        # Prøv å hente fra hovedenhets-API-et
         response = requests.get(f"{API_BASE_URL}/{orgnummer}")
         response.raise_for_status()
         data = response.json()
@@ -152,11 +164,32 @@ def hent_enhet(orgnummer):
         return data
     except requests.exceptions.RequestException as e:
         print(f"Feil ved henting av enhet {orgnummer}: {e}")
-        return None
+        # Prøv å hente fra underenhets-API-et
+        return hent_enhet_fra_underenheter(orgnummer)
+
+
+def hent_enhet_fra_underenheter(orgnummer):
+    """Hent detaljer om en spesifikk underenhet basert på organisasjonsnummer."""
+    try:
+        # Søk etter underenheten ved å bruke orgnummer som parameter
+        params = {"organisasjonsnummer": orgnummer, "size": 1}
+        response = requests.get(API_UNDERENHETER_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        underenheter = data.get("_embedded", {}).get("underenheter", [])
+        if underenheter:
+            underenhet = underenheter[0]
+            adresse = formater_adresse(underenhet.get("beliggenhetsadresse", {}))
+            underenhet["adresse"] = adresse
+            return underenhet
+    except requests.exceptions.RequestException as e:
+        print(f"Feil ved henting av underenhet {orgnummer}: {e}")
+    return None
 
 
 def hent_underenheter(orgnummer):
-    """Hent alle underenheter for en spesifikk hovedenhet uten å hente EHF-status."""
+    """Hent alle underenheter for en spesifikk hovedenhet eller underenhet uten å hente EHF-status."""
     underenheter = []
     try:
         params = {"overordnetEnhet": orgnummer, "size": 100}
