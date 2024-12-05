@@ -19,11 +19,11 @@
         {% elif søkeord %}
             <h2>Søkeresultater for "{{ søkeord }}"</h2>
 
-            {% if hovedenheter or underenheter %}
-                <table id="resultater-tabell">
+            {% if hovedenheter %}
+                <h3>Hovedenheter</h3>
+                <table id="hovedenheter-tabell">
                     <thead>
                         <tr>
-                            <th>Type</th>
                             <th>Org.Nr</th>
                             <th>Navn</th>
                             <th>Adresse</th>
@@ -31,14 +31,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Hovedenheter -->
-                        {% if hovedenheter %}
-                        <tr class="gruppe-header">
-                            <td colspan="5">Hovedenheter</td>
-                        </tr>
                         {% for hovedenhet in hovedenheter %}
                         <tr>
-                            <td>Hovedenhet</td>
                             <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">{{ hovedenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
                             <td>{{ hovedenhet.adresse }}</td>
@@ -47,16 +41,24 @@
                             </td>
                         </tr>
                         {% endfor %}
-                        {% endif %}
-                    
-                        <!-- Underenheter -->
-                        {% if underenheter %}
-                        <tr class="gruppe-header">
-                            <td colspan="5">Underenheter</td>
+                    </tbody>
+                </table>
+            {% endif %}
+
+            {% if underenheter %}
+                <h3>Underenheter</h3>
+                <table id="underenheter-tabell">
+                    <thead>
+                        <tr>
+                            <th>Org.Nr</th>
+                            <th>Navn</th>
+                            <th>Adresse</th>
+                            <th>EHF</th>
                         </tr>
+                    </thead>
+                    <tbody>
                         {% for underenhet in underenheter %}
                         <tr>
-                            <td>Underenhet</td>
                             <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
                             <td>{{ underenhet.adresse }}</td>
@@ -65,11 +67,8 @@
                             </td>
                         </tr>
                         {% endfor %}
-                        {% endif %}
                     </tbody>
                 </table>
-            {% else %}
-                <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
             {% endif %}
         {% endif %}
     </div>
