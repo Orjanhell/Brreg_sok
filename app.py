@@ -1,10 +1,18 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import requests
 import aiohttp
 import asyncio
 import time
+import os
+from dotenv import load_dotenv
+import smtplib
+from email.mime.text import MIMEText
+
+# Last inn miljøvariabler fra .env-fil
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY') or 'din_hemmelige_nøkkel'  # Bytt ut med en sikker nøkkel
 
 # Base-URLer for API-et
 API_BASE_URL = "https://data.brreg.no/enhetsregisteret/api/enheter"
@@ -262,6 +270,38 @@ def søk_underenheter(søkeord, maks_resultater=20):
     except requests.exceptions.RequestException as e:
         print(f"Feil ved søk etter underenheter med navn {søkeord}: {e}")
     return resultater
+
+
+@app.route("/send-tilbakemelding", methods=["POST"])
+def send_tilbakemelding():
+    tilbakemelding = request.form.get("tilbakemelding", "").strip()
+    if tilbakemelding:
+        # Hent e-postinnstillinger fra miljøvariabler
+        sender_email = os.getenv('SENDER_EMAIL')
+        receiver_email = os.getenv('RECEIVER_EMAIL')
+        smtp_server = os.getenv('SMTP_SERVER')
+        smtp_port = int(os.getenv('SMTP_PORT', 587))
+        smtp_password = os.getenv('SMTP_PASSWORD')
+
+        subject = "Tilbakemelding fra FirmaSøk"
+        body = f"Tilbakemelding:\n\n{tilbakemelding}"
+
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = sender_email
+        msg["To"] = receiver_email
+
+        try:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(sender_email, smtp_password)
+                server.sendmail(sender_email, receiver_email, msg.as_string())
+            flash("Tilbakemelding sendt! Takk for din innsats.", "success")
+        except Exception as e:
+            print(f"Feil ved sending av tilbakemelding: {e}")
+            flash("Noe gikk galt. Vennligst prøv igjen senere.", "error")
+
+    return redirect(url_for("søk"))
 
 
 if __name__ == "__main__":

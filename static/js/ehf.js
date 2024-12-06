@@ -73,3 +73,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     begrensAntallForespørsler(tasks, 5); // Maks 5 samtidige forespørsler
 });
+<script>
+    // Få tak i modal-elementene
+    const feedbackButton = document.getElementById('feedback-button');
+    const feedbackModal = document.getElementById('feedback-modal');
+    const closeButton = document.querySelector('.close-button');
+
+    // Åpne modal når knappen klikkes
+    feedbackButton.addEventListener('click', () => {
+        feedbackModal.style.display = 'block';
+    });
+
+    // Lukk modal når "X" klikkes
+    closeButton.addEventListener('click', () => {
+        feedbackModal.style.display = 'none';
+    });
+
+    // Lukk modal når brukeren klikker utenfor modalinnholdet
+    window.addEventListener('click', (event) => {
+        if (event.target == feedbackModal) {
+            feedbackModal.style.display = 'none';
+        }
+    });
+</script>
