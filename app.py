@@ -118,7 +118,7 @@ def søk():
                     # Hvis ikke funnet i hovedenheter, prøv å søke i underenheter
                     enhet = hent_enhet_fra_underenheter(søkeord)
                     if enhet:
-                        underenheter = hent_underenheter(søkeord)
+                        underenheter = hent_underenheter(enhet.get("overordnetEnhet", søkeord))
                         return render_template(
                             "index.html",
                             hovedenheter=[enhet],
