@@ -18,7 +18,8 @@ API_UNDERENHETER_URL = "https://data.brreg.no/enhetsregisteret/api/underenheter"
 PEPPOL_API_URL = "https://directory.peppol.eu/search/1.0/json"
 
 EHF_CACHE = {}
-CACHE_EXPIRATION = 86400  # 24 timer
+CACHE_EXPIRATION = 604800  # 7 dager
+
 
 # Opprett en global semafor for å begrense samtidige peppol-kall
 SEM = asyncio.Semaphore(5)
