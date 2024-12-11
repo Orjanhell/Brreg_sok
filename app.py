@@ -86,15 +86,13 @@ def søk():
         søkeord = request.form.get("søkeord", "").strip()
 
         if søkeord:
-            # Sjekk om søkeordet er et org.nr
             if søkeord.replace(" ", "").isdigit():
                 søkeord = søkeord.replace(" ", "")
-                # Prøv å hente hovedenhet
+                # Prøv å hente hovedenhet (inkluderer organisasjonsledd)
                 enhet = hent_enhet(søkeord)
                 if enhet and "overordnetEnhet" not in enhet:
-                    # Fant en hovedenhet
+                    # Funnet en hovedenhet (inkludert organisasjonsledd)
                     underenheter = hent_underenheter(enhet.get("organisasjonsnummer"))
-                    # Marker spesifikk enhet (hovedenhet) siden dette er et direkte treff
                     return render_template(
                         "index.html",
                         hovedenheter=[enhet],
@@ -103,7 +101,7 @@ def søk():
                         søkeord=søkeord,
                     )
                 else:
-                    # Ingen hovedenhet funnet eller entiteten er underenhet (men vi skal ikke vise fallback)
+                    # Ingen hovedenhet funnet
                     return render_template(
                         "index.html",
                         feilmelding="Ingen treff funnet for organisasjonsnummeret.",
@@ -139,9 +137,10 @@ def ehf_status(orgnummer):
         return jsonify({"ehf": False}), 500
 
 def hent_enhet(orgnummer):
-    """Hent detaljer om en spesifikk hovedenhet. Returner None dersom ikke funnet."""
+    """Hent detaljer om en spesifikk hovedenhet. Bruk inkluder=organisasjonsledd for å få med f.eks. NAV ROGALAND."""
     try:
-        response = requests.get(f"{API_BASE_URL}/{orgnummer}")
+        # Legg til ?inkluder=organisasjonsledd
+        response = requests.get(f"{API_BASE_URL}/{orgnummer}?inkluder=organisasjonsledd")
         response.raise_for_status()
         data = response.json()
         adresse = formater_adresse(data.get("forretningsadresse", {}))
