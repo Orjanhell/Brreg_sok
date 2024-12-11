@@ -89,66 +89,26 @@ def søk():
             # Sjekk om søkeordet er et org.nr
             if søkeord.replace(" ", "").isdigit():
                 søkeord = søkeord.replace(" ", "")
-                # Prøv hovedenhet først
+                # Prøv å hente hovedenhet
                 enhet = hent_enhet(søkeord)
-                if enhet:
+                if enhet and "overordnetEnhet" not in enhet:
                     # Fant en hovedenhet
-                    overordnetEnhet = enhet.get("overordnetEnhet")
-                    if overordnetEnhet:
-                        # Dette betyr at 'enhet' egentlig er en underenhet (da den har overordnetEnhet)
-                        main_enhet = hent_enhet(overordnetEnhet)
-                        underenheter = hent_underenheter(overordnetEnhet)
-                        # Flytt spesifikk underenhet til toppen
-                        spesifikk_org = enhet.get("organisasjonsnummer")
-                        for i, u in enumerate(underenheter):
-                            if u["organisasjonsnummer"] == spesifikk_org:
-                                under = underenheter.pop(i)
-                                underenheter.insert(0, under)
-                                break
-                        return render_template(
-                            "index.html",
-                            hovedenheter=[main_enhet] if main_enhet else [],
-                            underenheter=underenheter,
-                            spesifikk_enhet=enhet,
-                            søkeord=søkeord,
-                        )
-                    else:
-                        # enheten er en hovedenhet
-                        underenheter = hent_underenheter(enhet.get("organisasjonsnummer"))
-                        return render_template(
-                            "index.html",
-                            hovedenheter=[enhet],
-                            underenheter=underenheter,
-                            spesifikk_enhet=enhet,  
-                            søkeord=søkeord,
-                        )
+                    underenheter = hent_underenheter(enhet.get("organisasjonsnummer"))
+                    # Marker spesifikk enhet (hovedenhet) siden dette er et direkte treff
+                    return render_template(
+                        "index.html",
+                        hovedenheter=[enhet],
+                        underenheter=underenheter,
+                        spesifikk_enhet=enhet,
+                        søkeord=søkeord,
+                    )
                 else:
-                    # Ikke funnet som hovedenhet - prøv underenhet eksplisitt
-                    underenhet = hent_enhet_fra_underenheter(søkeord)
-                    if underenhet:
-                        overordnetEnhet = underenhet.get("overordnetEnhet")
-                        main_enhet = hent_enhet(overordnetEnhet)
-                        underenheter = hent_underenheter(overordnetEnhet)
-                        # Flytt spesifikk underenhet til toppen
-                        spesifikk_org = underenhet.get("organisasjonsnummer")
-                        for i, u in enumerate(underenheter):
-                            if u["organisasjonsnummer"] == spesifikk_org:
-                                under = underenheter.pop(i)
-                                underenheter.insert(0, under)
-                                break
-                        return render_template(
-                            "index.html",
-                            hovedenheter=[main_enhet] if main_enhet else [],
-                            underenheter=underenheter,
-                            spesifikk_enhet=underenhet,
-                            søkeord=søkeord,
-                        )
-                    else:
-                        return render_template(
-                            "index.html",
-                            feilmelding="Ingen treff funnet for organisasjonsnummeret.",
-                            søkeord=søkeord,
-                        )
+                    # Ingen hovedenhet funnet eller entiteten er underenhet (men vi skal ikke vise fallback)
+                    return render_template(
+                        "index.html",
+                        feilmelding="Ingen treff funnet for organisasjonsnummeret.",
+                        søkeord=søkeord,
+                    )
             else:
                 # Søker på navn
                 hovedenheter, underenheter = søk_enheter_og_underenheter(søkeord)
@@ -189,23 +149,7 @@ def hent_enhet(orgnummer):
         return data
     except requests.exceptions.RequestException as e:
         print(f"Feil ved henting av enhet {orgnummer}: {e}")
-        return None  # Ikke fallback her, returner None
-
-def hent_enhet_fra_underenheter(orgnummer):
-    try:
-        params = {"organisasjonsnummer": orgnummer, "size": 1}
-        response = requests.get(API_UNDERENHETER_URL, params=params)
-        response.raise_for_status()
-        data = response.json()
-        underenheter = data.get("_embedded", {}).get("underenheter", [])
-        if underenheter:
-            underenhet = underenheter[0]
-            adresse = formater_adresse(underenhet.get("beliggenhetsadresse", {}))
-            underenhet["adresse"] = adresse
-            return underenhet
-    except requests.exceptions.RequestException as e:
-        print(f"Feil ved henting av underenhet {orgnummer}: {e}")
-    return None
+        return None
 
 def hent_underenheter(orgnummer):
     underenheter = []
