@@ -1,149 +1,140 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirmaSøk - Søk etter norske bedrifter og organisasjoner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>FirmaSøk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin: 20px auto;
+            width: 80%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .no-results {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
+    <h1>FirmaSøk</h1>
     <form method="POST">
-        <input type="text" id="søkeord" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" value="{{ søkeord or '' }}" required>
+        <input type="text" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" required>
         <button type="submit">Søk</button>
     </form>
-
     <div class="results">
-        {% if feilmelding %}
-            <p class="no-results">{{ feilmelding }}</p>
-        {% elif søkeord %}
-            <h2>Søkeresultater for "{{ søkeord }}"</h2>
-            {% if hovedenheter %}
-                <table id="hovedenheter-tabell">
-                    <thead>
-                        <tr>
-                            <th colspan="4" class="table-section-header">Hovedenheter</th>
-                        </tr>
-                        <tr>
-                            <th>Org.Nr</th>
-                            <th>Navn</th>
-                            <th>Adresse</th>
-                            <th>EHF</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for hovedenhet in hovedenheter %}
-                        <tr class="{% if spesifikk_enhet and hovedenhet.organisasjonsnummer == spesifikk_enhet.organisasjonsnummer %}spesifikk-enhet{% endif %}">
-                            <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">{{ hovedenhet.organisasjonsnummer }}</td>
-                            <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
-                            <td>{{ hovedenhet.adresse }}</td>
-                            <td>
-                                <span class="ehf-status gul" data-orgnummer="{{ hovedenhet.organisasjonsnummer }}"></span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
+        {% if enhet %}
+            <h2>Hovedenhet</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ enhet.organisasjonsnummer }}</td>
+                        <td>{{ enhet.navn }}</td>
+                        <td>{{ enhet.adresse }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
 
-            {% if underenheter %}
-                <table id="underenheter-tabell">
-                    <thead>
-                        <tr>
-                            <th colspan="4" class="table-section-header">Underenheter</th>
-                        </tr>
-                        <tr>
-                            <th>Org.Nr</th>
-                            <th>Navn</th>
-                            <th>Adresse</th>
-                            <th>EHF</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for underenhet in underenheter %}
-                        <tr class="{% if spesifikk_enhet and underenhet.organisasjonsnummer == spesifikk_enhet.organisasjonsnummer %}spesifikk-enhet{% endif %}">
-                            <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
-                            <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
-                            <td>{{ underenhet.adresse }}</td>
-                            <td>
-                                <span class="ehf-status gul" data-orgnummer="{{ underenhet.organisasjonsnummer }}"></span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
+        {% if underenheter %}
+            <h2>Underenheter</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for underenhet in underenheter %}
+                    <tr>
+                        <td>{{ underenhet.organisasjonsnummer }}</td>
+                        <td>{{ underenhet.navn }}</td>
+                        <td>{{ underenhet.adresse }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if resultater %}
+            <h2>Søkeresultater</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisasjonsnummer</th>
+                        <th>Navn</th>
+                        <th>Adresse</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultat in resultater %}
+                    <tr>
+                        <td>{{ resultat.organisasjonsnummer }}</td>
+                        <td>{{ resultat.navn }}</td>
+                        <td>{{ resultat.adresse }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if ingen_treff %}
+            <p class="no-results">Ingen resultater funnet for "{{ søkeord }}".</p>
         {% endif %}
     </div>
-
-    <button id="feedback-button">Send tilbakemelding</button>
-
-    <div id="feedback-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Send Tilbakemelding</h2>
-            <form id="feedback-form">
-                <label for="tilbakemelding">Din tilbakemelding:</label>
-                <textarea id="tilbakemelding" name="tilbakemelding" rows="4" required></textarea>
-                <button type="submit">Send</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/sortering.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/ehf.js') }}"></script>
-    <script>
-        function søkPåOrgNr(orgNr) {
-            const søkefelt = document.getElementById('søkeord');
-            søkefelt.value = orgNr;
-            søkefelt.form.submit();
-        }
-
-        function søkPåNavn(navn) {
-            const søkefelt = document.getElementById('søkeord');
-            søkefelt.value = navn;
-            søkefelt.form.submit();
-        }
-
-        const feedbackButton = document.getElementById('feedback-button');
-        const feedbackModal = document.getElementById('feedback-modal');
-        const closeButton = document.querySelector('.close-button');
-        const feedbackForm = document.getElementById('feedback-form');
-
-        feedbackButton.addEventListener('click', () => {
-            feedbackModal.style.display = 'block';
-        });
-
-        closeButton.addEventListener('click', () => {
-            feedbackModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target == feedbackModal) {
-                feedbackModal.style.display = 'none';
-            }
-        });
-
-        feedbackForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const tilbakemelding = document.getElementById('tilbakemelding').value;
-            const receiverEmail = "orjan.helland@senabeikeland.no";
-            const subject = "Tilbakemeldinger fra Brønnøysund FirmaSøk";
-            const body = encodeURIComponent(tilbakemelding);
-            const mailtoLink = `mailto:${receiverEmail}?subject=${encodeURIComponent(subject)}&body=${body}`;
-            window.location.href = mailtoLink;
-            feedbackModal.style.display = 'none';
-        });
-    </script>
 </body>
 </html>
