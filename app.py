@@ -88,10 +88,10 @@ def søk():
         if søkeord:
             if søkeord.replace(" ", "").isdigit():
                 søkeord = søkeord.replace(" ", "")
-                # Prøv å hente hovedenhet (inkluderer organisasjonsledd)
+                # Hent hovedenhet med inkluder=alle for å få med organisasjonsledd
                 enhet = hent_enhet(søkeord)
                 if enhet and "overordnetEnhet" not in enhet:
-                    # Funnet en hovedenhet (inkludert organisasjonsledd)
+                    # Funnet en enhet som ikke har overordnetEnhet => hovedenhet
                     underenheter = hent_underenheter(enhet.get("organisasjonsnummer"))
                     return render_template(
                         "index.html",
@@ -137,10 +137,10 @@ def ehf_status(orgnummer):
         return jsonify({"ehf": False}), 500
 
 def hent_enhet(orgnummer):
-    """Hent detaljer om en spesifikk hovedenhet. Bruk inkluder=organisasjonsledd for å få med f.eks. NAV ROGALAND."""
+    """Hent detaljer om en spesifikk hovedenhet, inkluder alle typer ved ?inkluder=alle."""
     try:
-        # Legg til ?inkluder=organisasjonsledd
-        response = requests.get(f"{API_BASE_URL}/{orgnummer}?inkluder=organisasjonsledd")
+        # Bruk inkluder=alle for å få med organisasjonsledd og andre typer
+        response = requests.get(f"{API_BASE_URL}/{orgnummer}?inkluder=alle")
         response.raise_for_status()
         data = response.json()
         adresse = formater_adresse(data.get("forretningsadresse", {}))
