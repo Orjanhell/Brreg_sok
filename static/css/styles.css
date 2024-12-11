@@ -301,3 +301,9 @@ td[ondblclick]:focus {
 .flash-message.error {
     background-color: #F44336; /* Rød */
 }
+
+/* ---------- Spesifikk Underenhet Styling ---------- */
+.spesifikk-underenhet {
+    background-color: #d1e7dd; /* Lys grønn bakgrunn */
+    border-left: 5px solid #0f5132; /* Mørk grønn venstre kant */
+}
