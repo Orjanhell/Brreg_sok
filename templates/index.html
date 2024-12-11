@@ -84,21 +84,9 @@
         {% endif %}
     </div>
 
-    <!-- Send Tilbakemelding Knapp -->
-    <button id="feedback-button">Send tilbakemelding</button>
+    <!-- Send Tilbakemelding Lenke -->
+<a id="feedback-button" href="mailto:orjan.helland@senabeikeland.no?subject=Tilbakemeldinger%20Brreg%20FirmaSøk">Send tilbakemelding</a>
 
-    <!-- Tilbakemelding Modal -->
-    <div id="feedback-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Send Tilbakemelding</h2>
-            <form id="feedback-form" method="POST" action="/send-tilbakemelding">
-                <label for="tilbakemelding">Din tilbakemelding:</label>
-                <textarea id="tilbakemelding" name="tilbakemelding" rows="4" required></textarea>
-                <button type="submit">Send</button>
-            </form>
-        </div>
-    </div>
 
     <script src="{{ url_for('static', filename='js/sortering.js') }}"></script>
     <script src="{{ url_for('static', filename='js/ehf.js') }}"></script>
@@ -114,25 +102,6 @@
             søkefelt.value = navn;
             søkefelt.form.submit();
         }
-
-        // JavaScript for Feedback Modal
-        const feedbackButton = document.getElementById('feedback-button');
-        const feedbackModal = document.getElementById('feedback-modal');
-        const closeButton = document.querySelector('.close-button');
-
-        feedbackButton.addEventListener('click', () => {
-            feedbackModal.style.display = 'block';
-        });
-
-        closeButton.addEventListener('click', () => {
-            feedbackModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target == feedbackModal) {
-                feedbackModal.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
