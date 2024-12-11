@@ -22,7 +22,7 @@ async function oppdaterEHFStatus(orgnummer, statusElement) {
 }
 
 function settStatus(element, status) {
-    element.classList.remove('grønn', 'gul', 'rød', 'spinner');
+    element.classList.remove('grønn', 'gul', 'rød');
     element.classList.add(status);
     if (status !== 'gul') {
         element.classList.remove('spinner');
