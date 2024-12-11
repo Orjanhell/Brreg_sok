@@ -1,12 +1,13 @@
+/* ---------- Grunnleggende stiler ---------- */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f9f9f9;
 }
 
-h1, h2 {
+h1, h2, h3 {
     text-align: center;
-    color: #E16A03;
+    color: #E16A03; /* Oransje */
 }
 
 form {
@@ -40,9 +41,10 @@ button {
 }
 
 button:hover {
-    background-color: #cc5903;
+    background-color: #cc5903; /* Mørkere oransje */
 }
 
+/* ---------- Resultatseksjon ---------- */
 .results {
     margin: 20px auto;
     width: 90%;
@@ -51,47 +53,47 @@ button:hover {
 .no-results {
     text-align: center;
     font-size: 18px;
-    color: #F44336;
+    color: #F44336; /* Rød */
 }
 
-/* Justere tabellene for å se ut som en sammenhengende tabell */
+/* ---------- Tabellstiler ---------- */
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    table-layout: fixed;
-}
-
-#hovedenheter-tabell,
-#underenheter-tabell {
     margin-top: 20px;
-}
-
-#underenheter-tabell {
-    border-top: none; /* Fjern top border for å få det til å se ut som fortsettelse av hovedenhets-tabellen */
+    background-color: #fff;
 }
 
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-thead th {
+table th:first-child,
+table td:first-child {
+    width: 15%;
+    text-align: left;
+}
+
+th {
     background-color: #E16A03;
     color: white;
-    /* Fjern cursor pointer */
-    cursor: default;
+    cursor: pointer;
 }
 
-/* Kommenter ut eller fjern hover-effekten */
-/* thead th:hover {
+th:hover {
     background-color: #cc5903;
-} */
+}
 
+td {
+    vertical-align: middle;
+}
+
+table tbody tr {
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
 
 table tbody tr:hover {
     background-color: #f2f2f2;
@@ -101,17 +103,7 @@ table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Overskriftsrad for hver seksjon */
-.table-section-header {
-    background-color: #f4f4f4;
-    font-weight: bold;
-    text-align: left;
-    font-size: 16px;
-    color: #E16A03;
-    border: none;
-}
-
-/* EHF-status indikatorer */
+/* ---------- EHF-status indikatorer ---------- */
 .ehf-status {
     display: inline-block;
     width: 12px;
@@ -121,18 +113,19 @@ table tbody tr:nth-child(even) {
 }
 
 .ehf-status.grønn {
-    background-color: #4CAF50;
+    background-color: #4CAF50; /* Grønn */
 }
 
 .ehf-status.rød {
-    background-color: #F44336;
+    background-color: #F44336; /* Rød */
 }
 
 .ehf-status.gul {
-    background-color: #FFC107;
+    background-color: #FFC107; /* Gul */
     animation: puls 1s infinite;
 }
 
+/* Spinner for lastingsindikator */
 @keyframes puls {
     0% {
         opacity: 0.7;
@@ -149,15 +142,60 @@ table tbody tr:nth-child(even) {
     animation: puls 1s infinite;
 }
 
-/* Spesifikk enhet markering */
-.spesifikk-enhet {
-    background-color: #d1e7dd;      /* Lys grønn bakgrunn */
-    border-left: 5px solid #0f5132; /* Mørk grønn venstre kant */
-    font-size: 1.2em;               /* Større tekst */
-    font-weight: bold;              /* Fet tekst */
+/* ---------- Interaktivitet ---------- */
+td[ondblclick] {
+    cursor: pointer;
 }
 
-/* Send Tilbakemelding Knapp */
+td[ondblclick]:hover {
+    background-color: #f1f1f1;
+}
+
+/* ---------- Gruppeheader ---------- */
+.gruppe-header {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: left;
+    font-size: 16px;
+    color: #E16A03; /* Oransje tekst */
+}
+
+.gruppe-header td {
+    padding: 10px;
+    border: none;
+}
+
+/* ---------- Tilgjengelighet ---------- */
+button:focus,
+input[type="text"]:focus,
+td[ondblclick]:focus {
+    outline: 2px solid #E16A03;
+}
+
+/* ---------- Responsivt design ---------- */
+@media (max-width: 768px) {
+    body {
+        margin: 10px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+    }
+
+    .results {
+        width: 100%;
+    }
+
+    table, th, td {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 6px;
+    }
+}
+
+/* ---------- Send Tilbakemelding Knapp ---------- */
 #feedback-button {
     position: fixed;
     bottom: 20px;
@@ -177,22 +215,22 @@ table tbody tr:nth-child(even) {
     background-color: #cc5903;
 }
 
-/* Modal Styling */
+/* ---------- Modal Styling ---------- */
 .modal {
-    display: none;
+    display: none; /* Skjult som standard */
     position: fixed;
-    z-index: 1001;
+    z-index: 1001; /* Over knappen */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4); /* Transparent bakgrunn */
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 10% auto;
+    margin: 10% auto; /* 10% fra toppen */
     padding: 20px;
     border: 1px solid #888;
     width: 90%;
@@ -240,7 +278,7 @@ table tbody tr:nth-child(even) {
     background-color: #cc5903;
 }
 
-/* Flash Meldinger */
+/* ---------- Flash Meldinger ---------- */
 .flash-messages {
     position: fixed;
     top: 20px;
@@ -257,9 +295,9 @@ table tbody tr:nth-child(even) {
 }
 
 .flash-message.success {
-    background-color: #4CAF50;
+    background-color: #4CAF50; /* Grønn */
 }
 
 .flash-message.error {
-    background-color: #F44336;
+    background-color: #F44336; /* Rød */
 }
