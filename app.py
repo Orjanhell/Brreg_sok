@@ -5,8 +5,8 @@ import asyncio
 import time
 import os
 from dotenv import load_dotenv
-import smtplib
 from email.mime.text import MIMEText
+import smtplib
 
 # Last inn miljøvariabler
 load_dotenv()
@@ -63,7 +63,6 @@ async def sjekk_ehf_peppol_async(orgnummer):
             while True:
                 async with session.get(PEPPOL_API_URL, params=params, timeout=10) as response:
                     if response.status == 429:
-                        print(f"Rate limit nådd for {orgnummer}. Venter...")
                         await asyncio.sleep(1)
                         continue
                     elif response.status == 200:
@@ -87,18 +86,25 @@ def søk():
         søkeord = request.form.get("søkeord", "").strip()
 
         if søkeord:
-            # Sjekk om søkeordet er et organisasjonsnummer
+            # Sjekk om søkeordet er et org.nr
             if søkeord.replace(" ", "").isdigit():
                 søkeord = søkeord.replace(" ", "")
                 enhet = hent_enhet(søkeord)
                 if enhet:
-                    # Dersom vi fant en hovedenhet direkte
                     overordnetEnhet = enhet.get("overordnetEnhet")
                     if overordnetEnhet:
-                        # Dette er egentlig en underenhet, men funnet som "enhet"
-                        # Da viser vi hovedenheten + underenheter og markerer spesifikk enhet
+                        # enhet er egentlig en underenhet
                         main_enhet = hent_enhet(overordnetEnhet)
                         underenheter = hent_underenheter(overordnetEnhet)
+
+                        # Flytt spesifikk underenhet til toppen
+                        spesifikk_org = enhet.get("organisasjonsnummer")
+                        for i, u in enumerate(underenheter):
+                            if u["organisasjonsnummer"] == spesifikk_org:
+                                under = underenheter.pop(i)
+                                underenheter.insert(0, under)
+                                break
+
                         return render_template(
                             "index.html",
                             hovedenheter=[main_enhet] if main_enhet else [],
@@ -107,27 +113,37 @@ def søk():
                             søkeord=søkeord,
                         )
                     else:
-                        # Enheten er hovedenhet
+                        # enhet er hovedenhet
                         underenheter = hent_underenheter(enhet.get("organisasjonsnummer"))
+                        # Hvis søket var på en hovedenhet direkte, merk den spesifikt
                         return render_template(
                             "index.html",
                             hovedenheter=[enhet],
                             underenheter=underenheter,
-                            spesifikk_enhet=enhet,  # marker hovedenheten om søket var direkte
+                            spesifikk_enhet=enhet,
                             søkeord=søkeord,
                         )
                 else:
-                    # Ikke funnet som hovedenhet, prøv underenhet
+                    # ikke funnet som hovedenhet, prøv underenhet
                     enhet = hent_enhet_fra_underenheter(søkeord)
                     if enhet:
                         overordnetEnhet = enhet.get("overordnetEnhet")
                         main_enhet = hent_enhet(overordnetEnhet)
                         underenheter = hent_underenheter(overordnetEnhet)
+
+                        # Flytt spesifikk underenhet til toppen
+                        spesifikk_org = enhet.get("organisasjonsnummer")
+                        for i, u in enumerate(underenheter):
+                            if u["organisasjonsnummer"] == spesifikk_org:
+                                under = underenheter.pop(i)
+                                underenheter.insert(0, under)
+                                break
+
                         return render_template(
                             "index.html",
                             hovedenheter=[main_enhet] if main_enhet else [],
                             underenheter=underenheter,
-                            spesifikk_enhet=enhet,  # marker denne underenheten
+                            spesifikk_enhet=enhet,
                             søkeord=søkeord,
                         )
                     else:
@@ -137,7 +153,7 @@ def søk():
                             søkeord=søkeord,
                         )
             else:
-                # Søk basert på navn
+                # Søker på navn
                 hovedenheter, underenheter = søk_enheter_og_underenheter(søkeord)
                 if not hovedenheter and not underenheter:
                     return render_template(
