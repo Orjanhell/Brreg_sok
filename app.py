@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from email.mime.text import MIMEText
 import smtplib
 
-# Last inn miljøvariabler
 load_dotenv()
 
 app = Flask(__name__)
@@ -63,6 +62,7 @@ async def sjekk_ehf_peppol_async(orgnummer):
             while True:
                 async with session.get(PEPPOL_API_URL, params=params, timeout=10) as response:
                     if response.status == 429:
+                        print(f"Rate limit nådd for {orgnummer}. Venter...")
                         await asyncio.sleep(1)
                         continue
                     elif response.status == 200:
@@ -89,14 +89,15 @@ def søk():
             # Sjekk om søkeordet er et org.nr
             if søkeord.replace(" ", "").isdigit():
                 søkeord = søkeord.replace(" ", "")
+                # Prøv hovedenhet først
                 enhet = hent_enhet(søkeord)
                 if enhet:
+                    # Fant en hovedenhet
                     overordnetEnhet = enhet.get("overordnetEnhet")
                     if overordnetEnhet:
-                        # enhet er egentlig en underenhet
+                        # Dette betyr at 'enhet' egentlig er en underenhet (da den har overordnetEnhet)
                         main_enhet = hent_enhet(overordnetEnhet)
                         underenheter = hent_underenheter(overordnetEnhet)
-
                         # Flytt spesifikk underenhet til toppen
                         spesifikk_org = enhet.get("organisasjonsnummer")
                         for i, u in enumerate(underenheter):
@@ -104,7 +105,6 @@ def søk():
                                 under = underenheter.pop(i)
                                 underenheter.insert(0, under)
                                 break
-
                         return render_template(
                             "index.html",
                             hovedenheter=[main_enhet] if main_enhet else [],
@@ -113,37 +113,34 @@ def søk():
                             søkeord=søkeord,
                         )
                     else:
-                        # enhet er hovedenhet
+                        # enheten er en hovedenhet
                         underenheter = hent_underenheter(enhet.get("organisasjonsnummer"))
-                        # Hvis søket var på en hovedenhet direkte, merk den spesifikt
                         return render_template(
                             "index.html",
                             hovedenheter=[enhet],
                             underenheter=underenheter,
-                            spesifikk_enhet=enhet,
+                            spesifikk_enhet=enhet,  
                             søkeord=søkeord,
                         )
                 else:
-                    # ikke funnet som hovedenhet, prøv underenhet
-                    enhet = hent_enhet_fra_underenheter(søkeord)
-                    if enhet:
-                        overordnetEnhet = enhet.get("overordnetEnhet")
+                    # Ikke funnet som hovedenhet - prøv underenhet eksplisitt
+                    underenhet = hent_enhet_fra_underenheter(søkeord)
+                    if underenhet:
+                        overordnetEnhet = underenhet.get("overordnetEnhet")
                         main_enhet = hent_enhet(overordnetEnhet)
                         underenheter = hent_underenheter(overordnetEnhet)
-
                         # Flytt spesifikk underenhet til toppen
-                        spesifikk_org = enhet.get("organisasjonsnummer")
+                        spesifikk_org = underenhet.get("organisasjonsnummer")
                         for i, u in enumerate(underenheter):
                             if u["organisasjonsnummer"] == spesifikk_org:
                                 under = underenheter.pop(i)
                                 underenheter.insert(0, under)
                                 break
-
                         return render_template(
                             "index.html",
                             hovedenheter=[main_enhet] if main_enhet else [],
                             underenheter=underenheter,
-                            spesifikk_enhet=enhet,
+                            spesifikk_enhet=underenhet,
                             søkeord=søkeord,
                         )
                     else:
@@ -182,6 +179,7 @@ def ehf_status(orgnummer):
         return jsonify({"ehf": False}), 500
 
 def hent_enhet(orgnummer):
+    """Hent detaljer om en spesifikk hovedenhet. Returner None dersom ikke funnet."""
     try:
         response = requests.get(f"{API_BASE_URL}/{orgnummer}")
         response.raise_for_status()
@@ -191,7 +189,7 @@ def hent_enhet(orgnummer):
         return data
     except requests.exceptions.RequestException as e:
         print(f"Feil ved henting av enhet {orgnummer}: {e}")
-        return hent_enhet_fra_underenheter(orgnummer)
+        return None  # Ikke fallback her, returner None
 
 def hent_enhet_fra_underenheter(orgnummer):
     try:
