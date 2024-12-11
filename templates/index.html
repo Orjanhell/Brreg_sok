@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <!-- Flash Meldinger -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
@@ -29,11 +28,12 @@
             <p class="no-results">{{ feilmelding }}</p>
         {% elif søkeord %}
             <h2>Søkeresultater for "{{ søkeord }}"</h2>
-
             {% if hovedenheter %}
-                <h3>Hovedenheter</h3>
                 <table id="hovedenheter-tabell">
                     <thead>
+                        <tr>
+                            <th colspan="4" class="table-section-header">Hovedenheter</th>
+                        </tr>
                         <tr>
                             <th>Org.Nr</th>
                             <th>Navn</th>
@@ -43,7 +43,7 @@
                     </thead>
                     <tbody>
                         {% for hovedenhet in hovedenheter %}
-                        <tr>
+                        <tr class="{% if spesifikk_enhet and hovedenhet.organisasjonsnummer == spesifikk_enhet.organisasjonsnummer %}spesifikk-enhet{% endif %}">
                             <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">{{ hovedenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
                             <td>{{ hovedenhet.adresse }}</td>
@@ -57,9 +57,11 @@
             {% endif %}
 
             {% if underenheter %}
-                <h3>Underenheter</h3>
                 <table id="underenheter-tabell">
                     <thead>
+                        <tr>
+                            <th colspan="4" class="table-section-header">Underenheter</th>
+                        </tr>
                         <tr>
                             <th>Org.Nr</th>
                             <th>Navn</th>
@@ -69,7 +71,7 @@
                     </thead>
                     <tbody>
                         {% for underenhet in underenheter %}
-                        <tr class="{% if spesifikk_underenhet and underenhet.organisasjonsnummer == spesifikk_underenhet.organisasjonsnummer %}spesifikk-underenhet{% endif %}">
+                        <tr class="{% if spesifikk_enhet and underenhet.organisasjonsnummer == spesifikk_enhet.organisasjonsnummer %}spesifikk-enhet{% endif %}">
                             <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
                             <td>{{ underenhet.adresse }}</td>
@@ -84,10 +86,8 @@
         {% endif %}
     </div>
 
-    <!-- Send Tilbakemelding Knapp -->
     <button id="feedback-button">Send tilbakemelding</button>
 
-    <!-- Tilbakemelding Modal -->
     <div id="feedback-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -115,7 +115,6 @@
             søkefelt.form.submit();
         }
 
-        // JavaScript for Feedback Modal
         const feedbackButton = document.getElementById('feedback-button');
         const feedbackModal = document.getElementById('feedback-modal');
         const closeButton = document.querySelector('.close-button');
@@ -136,19 +135,13 @@
         });
 
         feedbackForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Forhindre at siden laster på nytt
-
+            event.preventDefault();
             const tilbakemelding = document.getElementById('tilbakemelding').value;
             const receiverEmail = "orjan.helland@senabeikeland.no";
             const subject = "Tilbakemeldinger fra Brønnøysund FirmaSøk";
             const body = encodeURIComponent(tilbakemelding);
-
             const mailtoLink = `mailto:${receiverEmail}?subject=${encodeURIComponent(subject)}&body=${body}`;
-
-            // Åpne mailto-lenken
             window.location.href = mailtoLink;
-
-            // Lukk modalen
             feedbackModal.style.display = 'none';
         });
     </script>
