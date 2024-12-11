@@ -107,22 +107,27 @@ def søk():
                 søkeord = søkeord.replace(" ", "")
                 enhet = hent_enhet(søkeord)
                 if enhet:
-                    underenheter = hent_underenheter(søkeord)
+                    overordnetEnhet = enhet.get("overordnetEnhet")
+                    underenheter = hent_underenheter(overordnetEnhet) if overordnetEnhet else []
                     return render_template(
                         "index.html",
-                        hovedenheter=[enhet],
+                        hovedenheter=[enhet] if not overordnetEnhet else [hent_enhet(overordnetEnhet)],
                         underenheter=underenheter,
+                        spesifikk_underenhet=enhet if overordnetEnhet else None,
                         søkeord=søkeord,
                     )
                 else:
                     # Hvis ikke funnet i hovedenheter, prøv å søke i underenheter
                     enhet = hent_enhet_fra_underenheter(søkeord)
                     if enhet:
-                        underenheter = hent_underenheter(enhet.get("overordnetEnhet", søkeord))
+                        overordnetEnhet = enhet.get("overordnetEnhet")
+                        main_enhet = hent_enhet(overordnetEnhet)
+                        underenheter = hent_underenheter(overordnetEnhet)
                         return render_template(
                             "index.html",
-                            hovedenheter=[enhet],
+                            hovedenheter=[main_enhet] if main_enhet else [],
                             underenheter=underenheter,
+                            spesifikk_underenhet=enhet,
                             søkeord=søkeord,
                         )
                     else:
@@ -156,8 +161,12 @@ def søk():
 @app.route("/ehf-status/<orgnummer>")
 def ehf_status(orgnummer):
     """Endepunkt for å hente EHF-status for et organisasjonsnummer."""
-    ehf_støtte = asyncio.run(sjekk_ehf_peppol_async(orgnummer))
-    return jsonify({"ehf": ehf_støtte})
+    try:
+        ehf_støtte = asyncio.run(sjekk_ehf_peppol_async(orgnummer))
+        return jsonify({"ehf": ehf_støtte})
+    except Exception as e:
+        print(f"Feil i EHF-status endepunkt for {orgnummer}: {e}")
+        return jsonify({"ehf": False}), 500
 
 
 def hent_enhet(orgnummer):
@@ -276,12 +285,12 @@ def søk_underenheter(søkeord, maks_resultater=20):
 def send_tilbakemelding():
     tilbakemelding = request.form.get("tilbakemelding", "").strip()
     if tilbakemelding:
-        # Hent e-postinnstillinger fra miljøvariabler
-        sender_email = os.getenv('SENDER_EMAIL')
-        receiver_email = os.getenv('RECEIVER_EMAIL')
-        smtp_server = os.getenv('SMTP_SERVER')
-        smtp_port = int(os.getenv('SMTP_PORT', 587))
-        smtp_password = os.getenv('SMTP_PASSWORD')
+        # Hent e-postinnstillinger fra miljøvariabler eller hardkod direkte
+        sender_email = os.getenv('SENDER_EMAIL') or "din_email@example.com"  # Bytt ut med din avsender-e-post
+        receiver_email = "orjan.helland@senabeikeland.no"  # Hardkodet mottaker
+        smtp_server = os.getenv('SMTP_SERVER') or "smtp.example.com"   # Bytt ut med din SMTP-server
+        smtp_port = int(os.getenv('SMTP_PORT', 465))                   # Bruk 465 for SMTP_SSL, eller 587 for SMTP med STARTTLS
+        smtp_password = os.getenv('SMTP_PASSWORD') or "ditt_password"   # Bytt ut med ditt SMTP-passord
 
         subject = "Tilbakemelding fra FirmaSøk"
         body = f"Tilbakemelding:\n\n{tilbakemelding}"
@@ -292,13 +301,25 @@ def send_tilbakemelding():
         msg["To"] = receiver_email
 
         try:
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
+            # Prøv med SMTP_SSL først (port 465)
+            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
                 server.login(sender_email, smtp_password)
                 server.sendmail(sender_email, receiver_email, msg.as_string())
             flash("Tilbakemelding sendt! Takk for din innsats.", "success")
+        except smtplib.SMTPException as e_ssl:
+            print(f"Feil ved SMTP_SSL sending av tilbakemelding: {e_ssl}")
+            try:
+                # Hvis SMTP_SSL feiler, prøv med SMTP og STARTTLS (port 587)
+                with smtplib.SMTP(smtp_server, 587) as server:
+                    server.starttls()
+                    server.login(sender_email, smtp_password)
+                    server.sendmail(sender_email, receiver_email, msg.as_string())
+                flash("Tilbakemelding sendt! Takk for din innsats.", "success")
+            except smtplib.SMTPException as e_starttls:
+                print(f"Feil ved SMTP STARTTLS sending av tilbakemelding: {e_starttls}")
+                flash("Noe gikk galt. Vennligst prøv igjen senere.", "error")
         except Exception as e:
-            print(f"Feil ved sending av tilbakemelding: {e}")
+            print(f"Generell feil ved sending av tilbakemelding: {e}")
             flash("Noe gikk galt. Vennligst prøv igjen senere.", "error")
 
     return redirect(url_for("søk"))
