@@ -47,9 +47,7 @@
                             <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">{{ hovedenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
                             <td>{{ hovedenhet.adresse }}</td>
-                            <td>
-                                <span class="ehf-status gul" data-orgnummer="{{ hovedenhet.organisasjonsnummer }}"></span>
-                            </td>
+                            <td><span class="ehf-status gul" data-orgnummer="{{ hovedenhet.organisasjonsnummer }}"></span></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -73,9 +71,7 @@
                             <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
                             <td>{{ underenhet.adresse }}</td>
-                            <td>
-                                <span class="ehf-status gul" data-orgnummer="{{ underenhet.organisasjonsnummer }}"></span>
-                            </td>
+                            <td><span class="ehf-status gul" data-orgnummer="{{ underenhet.organisasjonsnummer }}"></span></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -84,12 +80,11 @@
         {% endif %}
     </div>
 
-    <!-- Send Tilbakemelding Lenke -->
-<a id="feedback-button" href="mailto:orjan.helland@senabeikeland.no?subject=Tilbakemeldinger%20Brreg%20FirmaSøk">Send tilbakemelding</a>
-
+    <!-- Mailto-lenke i stedet for modal -->
+    <a id="feedback-button" href="mailto:orjan.helland@senabeikeland.no?subject=Tilbakemeldinger%20Brreg%20FirmaSøk">Send tilbakemelding</a>
 
     <script src="{{ url_for('static', filename='js/sortering.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/ehf.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ehf_bulk.js') }}"></script> <!-- Ny JS-fil -->
     <script>
         function søkPåOrgNr(orgNr) {
             const søkefelt = document.getElementById('søkeord');
