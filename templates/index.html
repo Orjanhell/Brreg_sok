@@ -69,7 +69,7 @@
                     </thead>
                     <tbody>
                         {% for underenhet in underenheter %}
-                        <tr>
+                        <tr class="{% if spesifikk_underenhet and underenhet.organisasjonsnummer == spesifikk_underenhet.organisasjonsnummer %}spesifikk-underenhet{% endif %}">
                             <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
                             <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
                             <td>{{ underenhet.adresse }}</td>
@@ -92,7 +92,7 @@
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h2>Send Tilbakemelding</h2>
-            <form id="feedback-form" method="POST" action="/send-tilbakemelding">
+            <form id="feedback-form">
                 <label for="tilbakemelding">Din tilbakemelding:</label>
                 <textarea id="tilbakemelding" name="tilbakemelding" rows="4" required></textarea>
                 <button type="submit">Send</button>
@@ -119,6 +119,7 @@
         const feedbackButton = document.getElementById('feedback-button');
         const feedbackModal = document.getElementById('feedback-modal');
         const closeButton = document.querySelector('.close-button');
+        const feedbackForm = document.getElementById('feedback-form');
 
         feedbackButton.addEventListener('click', () => {
             feedbackModal.style.display = 'block';
@@ -132,6 +133,23 @@
             if (event.target == feedbackModal) {
                 feedbackModal.style.display = 'none';
             }
+        });
+
+        feedbackForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Forhindre at siden laster på nytt
+
+            const tilbakemelding = document.getElementById('tilbakemelding').value;
+            const receiverEmail = "orjan.helland@senabeikeland.no";
+            const subject = "Tilbakemeldinger fra Brønnøysund FirmaSøk";
+            const body = encodeURIComponent(tilbakemelding);
+
+            const mailtoLink = `mailto:${receiverEmail}?subject=${encodeURIComponent(subject)}&body=${body}`;
+
+            // Åpne mailto-lenken
+            window.location.href = mailtoLink;
+
+            // Lukk modalen
+            feedbackModal.style.display = 'none';
         });
     </script>
 </body>
