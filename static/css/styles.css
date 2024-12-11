@@ -83,12 +83,15 @@ th, td {
 thead th {
     background-color: #E16A03;
     color: white;
-    cursor: pointer;
+    /* Fjern cursor pointer */
+    cursor: default;
 }
 
-thead th:hover {
+/* Kommenter ut eller fjern hover-effekten */
+/* thead th:hover {
     background-color: #cc5903;
-}
+} */
+
 
 table tbody tr:hover {
     background-color: #f2f2f2;
