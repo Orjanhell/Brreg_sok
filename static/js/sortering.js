@@ -22,6 +22,15 @@ function sortTable(tableId, columnIndex) {
 
     rows.forEach((row) => table.tBodies[0].appendChild(row));
 
+    // Oppdater sorteringsindikatorer
+    const headers = table.querySelectorAll('th');
+    headers.forEach((header, idx) => {
+        header.classList.remove('sorted-asc', 'sorted-desc');
+        if (idx === columnIndex) {
+            header.classList.add(ascending ? 'sorted-asc' : 'sorted-desc');
+        }
+    });
+
     table.setAttribute("data-sort-column", columnIndex);
     table.setAttribute("data-sort-order", ascending ? "asc" : "desc");
 }
