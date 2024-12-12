@@ -3,100 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirmaSøk - Søk etter norske bedrifter og organisasjoner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for ikoner -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-yH3lZGJey6E1XpKzVtN8YP6QH85PjFjv3K6CwKn+IuZ4Tm7lZ0Hcln8RkXn+1Srw5jdVUk5IkTvcBm0pR3OjSw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Ekstern CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='/css/styles.css') }}">
+
 </head>
 <body>
+
     <!-- Flash Meldinger -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
                 {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
+                    <div class="flash-message {{ category }}">
+                        {% if category == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif category == 'error' %}
+                            <i class="fas fa-times-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
 
-    <h1>FirmaSøk - Finn informasjon om norske bedrifter og organisasjoner</h1>
-    <form method="POST">
-        <input type="text" id="søkeord" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" value="{{ søkeord or '' }}" required>
-        <button type="submit">Søk</button>
-    </form>
+    <!-- Hero-seksjon -->
+    {% if not søkeord %}
+    <section class="hero" id="hero">
+        <div class="hero-content" id="hero-content">
+            <h1>Velkommen til FirmaSøk</h1>
+            <p>Finn raskt og enkelt informasjon om norske bedrifter og organisasjoner.</p>
+            <!-- Søkeform -->
+            <form method="POST" id="search-form">
+                <div class="search-container">
+                    <input type="text" id="søkeord" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" required>
+                    <button type="submit"><i class="fas fa-search"></i> Søk</button>
+                </div>
+            </form>
+        </div>
+    </section>
+    {% endif %}
 
-    <div class="results">
-        {% if feilmelding %}
-            <p class="no-results">{{ feilmelding }}</p>
-        {% elif søkeord %}
-            <h2>Søkeresultater for "{{ søkeord }}"</h2>
+    <!-- Fixed Search Bar (Vises kun etter søk) -->
+    {% if søkeord %}
+    <div class="search-fixed visible" id="fixed-search">
+        <form method="POST" id="fixed-search-form">
+            <div class="search-container">
+                <input type="text" id="fixed-søkeord" name="søkeord" placeholder="Angi firmanavn eller organisasjonsnummer" value="{{ søkeord }}" required>
+                <button type="submit"><i class="fas fa-search"></i> Søk</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
 
+    <!-- Resultatseksjon -->
+    <section class="section" id="result-section" {% if not søkeord %}style="display: none;"{% endif %}>
+        {% if søkeord %}
+            <h2>Søkeresultater for "<span id="search-query">{{ søkeord }}</span>"</h2>
+
+            <!-- Hovedenheter -->
             {% if hovedenheter %}
                 <h3>Hovedenheter</h3>
-                <table id="hovedenheter-tabell">
-                    <thead>
-                        <tr>
-                            <th>Org.Nr</th>
-                            <th>Navn</th>
-                            <th>Adresse</th>
-                            <th>EHF</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for hovedenhet in hovedenheter %}
-                        <tr>
-                            <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">{{ hovedenhet.organisasjonsnummer }}</td>
-                            <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
-                            <td>{{ hovedenhet.adresse }}</td>
-                            <td><span class="ehf-status gul" data-orgnummer="{{ hovedenhet.organisasjonsnummer }}"></span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="results-container">
+                    <div class="results" id="hovedenheter-results">
+                        <table id="hovedenheter-tabell">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable('hovedenheter-tabell', 0)">Org.Nr</th>
+                                    <th onclick="sortTable('hovedenheter-tabell', 1)">Navn</th>
+                                    <th onclick="sortTable('hovedenheter-tabell', 2)">Adresse</th>
+                                    <th onclick="sortTable('hovedenheter-tabell', 3)">EHF</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hovedenhet in hovedenheter %}
+                                <tr class="{% if searched_as == 'main' and hovedenhet.organisasjonsnummer == søkeord %}searched-unit{% endif %}">
+                                    <td ondblclick="søkPåOrgNr('{{ hovedenhet.organisasjonsnummer }}')">
+                                        {{ hovedenhet.organisasjonsnummer }}
+                                        {% if searched_as == 'main' and hovedenhet.organisasjonsnummer == søkeord %}
+                                            <i class="fas fa-star" title="Søkt enhet"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td ondblclick="søkPåNavn('{{ hovedenhet.navn }}')">{{ hovedenhet.navn }}</td>
+                                    <td>{{ hovedenhet.adresse }}</td>
+                                    <td>
+                                        <span class="ehf-status {{ hovedenhet.ehf }}" data-orgnummer="{{ hovedenhet.organisasjonsnummer }}">
+                                            {% if hovedenhet.ehf == 'grønn' %}
+                                                <i class="fas fa-check-circle"></i>
+                                            {% elif hovedenhet.ehf == 'rød' %}
+                                                <i class="fas fa-times-circle"></i>
+                                            {% else %}
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Scroll Piler for Hovedenheter -->
+                    <!-- Fjernet per brukerens ønske -->
+                </div>
             {% endif %}
 
+            <!-- Underenheter -->
             {% if underenheter %}
                 <h3>Underenheter</h3>
-                <table id="underenheter-tabell">
-                    <thead>
-                        <tr>
-                            <th>Org.Nr</th>
-                            <th>Navn</th>
-                            <th>Adresse</th>
-                            <th>EHF</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for underenhet in underenheter %}
-                        <tr>
-                            <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">{{ underenhet.organisasjonsnummer }}</td>
-                            <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
-                            <td>{{ underenhet.adresse }}</td>
-                            <td><span class="ehf-status gul" data-orgnummer="{{ underenhet.organisasjonsnummer }}"></span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="results-container">
+                    <div class="results" id="underenheter-results">
+                        <table id="underenheter-tabell">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable('underenheter-tabell', 0)">Org.Nr</th>
+                                    <th onclick="sortTable('underenheter-tabell', 1)">Navn</th>
+                                    <th onclick="sortTable('underenheter-tabell', 2)">Adresse</th>
+                                    <th onclick="sortTable('underenheter-tabell', 3)">EHF</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for underenhet in underenheter %}
+                                <tr class="{% if searched_as == 'subunit' and underenhet.organisasjonsnummer == søkeord %}searched-unit{% endif %}">
+                                    <td ondblclick="søkPåOrgNr('{{ underenhet.organisasjonsnummer }}')">
+                                        {{ underenhet.organisasjonsnummer }}
+                                        {% if searched_as == 'subunit' and underenhet.organisasjonsnummer == søkeord %}
+                                            <i class="fas fa-star" title="Søkt enhet"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td ondblclick="søkPåNavn('{{ underenhet.navn }}')">{{ underenhet.navn }}</td>
+                                    <td>{{ underenhet.adresse }}</td>
+                                    <td>
+                                        <span class="ehf-status {{ underenhet.ehf }}" data-orgnummer="{{ underenhet.organisasjonsnummer }}">
+                                            {% if underenhet.ehf == 'grønn' %}
+                                                <i class="fas fa-check-circle"></i>
+                                            {% elif underenhet.ehf == 'rød' %}
+                                                <i class="fas fa-times-circle"></i>
+                                            {% else %}
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Scroll Piler for Underenheter -->
+                    <!-- Fjernet per brukerens ønske -->
+                </div>
             {% endif %}
         {% endif %}
-    </div>
+    </section>
 
-    <!-- Mailto-lenke i stedet for modal -->
-    <a id="feedback-button" href="mailto:orjan.helland@senabeikeland.no?subject=Tilbakemeldinger%20Brreg%20FirmaSøk">Send tilbakemelding</a>
 
+    <!-- Send Tilbakemelding Knapp -->
+     <a id="feedback-button" href="mailto:orjan.helland@senabeikeland.no?subject=Tilbakemeldinger%20Brreg%20FirmaSøk">Send tilbakemelding</a>
+
+
+    <!-- JavaScript for Sortering, Scroll og Smooth Transition -->
     <script src="{{ url_for('static', filename='js/sortering.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/ehf_bulk.js') }}"></script> <!-- Ny JS-fil -->
+    <script src="{{ url_for('static', filename='js/ehf_bulk.js') }}"></script>
     <script>
         function søkPåOrgNr(orgNr) {
-            const søkefelt = document.getElementById('søkeord');
-            søkefelt.value = orgNr;
-            søkefelt.form.submit();
+            const søkefelt = document.getElementById('fixed-søkeord');
+            if (søkefelt) {
+                søkefelt.value = orgNr;
+                søkefelt.form.submit();
+            } else {
+                // Fallback hvis fixed-søkebar ikke finnes
+                const mainSøkefelt = document.getElementById('søkeord');
+                mainSøkefelt.value = orgNr;
+                mainSøkefelt.form.submit();
+            }
         }
 
         function søkPåNavn(navn) {
-            const søkefelt = document.getElementById('søkeord');
-            søkefelt.value = navn;
-            søkefelt.form.submit();
+            const søkefelt = document.getElementById('fixed-søkeord');
+            if (søkefelt) {
+                søkefelt.value = navn;
+                søkefelt.form.submit();
+            } else {
+                // Fallback hvis fixed-søkebar ikke finnes
+                const mainSøkefelt = document.getElementById('søkeord');
+                mainSøkefelt.value = navn;
+                mainSøkefelt.form.submit();
+            }
         }
+
+        // Funksjon for å flytte søkebar til toppen etter søk
+        function moveSearchBarToTop() {
+            const hero = document.getElementById('hero');
+            const fixedSearch = document.getElementById('fixed-search');
+
+            if (hero && fixedSearch) {
+                // Skjul hero-seksjonen
+                hero.classList.add('hidden');
+
+                // Vis den faste søkebaren
+                fixedSearch.classList.remove('hidden');
+                fixedSearch.classList.add('visible');
+
+                // Legg til padding-top på body
+                document.body.classList.add('padding-top');
+            }
+        }
+
+        // Håndtere søk fra hoved-søkebar
+        const searchForm = document.getElementById('search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                setTimeout(moveSearchBarToTop, 500); // Juster forsinkelse etter behov
+            });
+        }
+
+        // Håndtere søk fra fixed søkebar
+        const fixedSearchForm = document.getElementById('fixed-search-form');
+        if (fixedSearchForm) {
+            fixedSearchForm.addEventListener('submit', function(e) {
+                moveSearchBarToTop();
+            });
+        }
+
+        // Flytt søkebar til toppen hvis søkeord er tilstede ved sideinnlasting
+        document.addEventListener('DOMContentLoaded', () => {
+            const query = "{{ søkeord|default('') }}";
+            if (query) {
+                moveSearchBarToTop();
+            }
+
+            // Auto-scroll til den markerte raden
+            const searchedRow = document.querySelector('.searched-unit');
+            if (searchedRow) {
+                searchedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
     </script>
 </body>
 </html>
