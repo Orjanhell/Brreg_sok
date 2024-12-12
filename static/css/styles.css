@@ -1,219 +1,450 @@
-/* ---------- Grunnleggende stiler ---------- */
+/* ---------- Fargevariabler ---------- */
+:root {
+    --hovedfarge: #E16A03; /* Oransje */
+    --sekundarfarge: #3F6242; /* Grønn */
+    --tilleggsfarge: #000000; /* Svart */
+    --grå-80: #CCCCCC;
+    --grå-60: #999999;
+    --bakgrunn: #f9f9f9;
+    --hvit: #ffffff;
+    --transition-duration: 0.5s;
+}
+
+/* ---------- Reset og grunnleggende stiler ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f9f9f9;
+    font-family: 'Montserrat', Arial, sans-serif;
+    background-color: var(--bakgrunn);
+    color: var(--tilleggsfarge);
+    line-height: 1.6;
+    overflow-x: hidden; /* Unngå horisontal scrolling */
+    transition: padding-top var(--transition-duration) ease;
 }
 
-h1, h2, h3 {
-    text-align: center;
-    color: #E16A03; /* Oransje */
+/* Når body har klassen 'padding-top', legg til padding */
+body.padding-top {
+    padding-top: 60px; /* Match height of .search-fixed */
 }
 
-form {
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ---------- Flash Meldinger ---------- */
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+}
+
+.flash-message {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: white;
+    opacity: 0.95;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    animation: fadein 0.5s, fadeout 0.5s 4.5s;
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
-input[type="text"] {
-    padding: 5px;
-    font-size: 16px;
+.flash-message.success {
+    background-color: var(--sekundarfarge);
+}
+
+.flash-message.error {
+    background-color: var(--tilleggsfarge);
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to { opacity: 0.95; }
+}
+
+@keyframes fadeout {
+    from { opacity: 0.95; }
+    to { opacity: 0; }
+}
+
+/* ---------- Hero-seksjon ---------- */
+.hero {
+    position: relative;
+    height: 80vh;
+    background: url('https://source.unsplash.com/1600x900/?business,office') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--hvit);
+    text-align: center;
+    transition: opacity var(--transition-duration) ease, transform var(--transition-duration) ease;
+}
+
+.hero.hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Overlay for bedre kontrast */
+    z-index: 1;
+    transition: opacity var(--transition-duration) ease;
+}
+
+.hero.hidden::after {
+    opacity: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 20px;
+    transition: transform var(--transition-duration) ease;
+}
+
+.hero.hidden .hero-content {
+    transform: translateY(-100%);
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    transition: opacity var(--transition-duration) ease;
+}
+
+.hero.hidden h1 {
+    opacity: 0;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    font-family: 'Merriweather', serif;
+    font-style: italic;
+    transition: opacity var(--transition-duration) ease;
+}
+
+.hero.hidden p {
+    opacity: 0;
+}
+
+.hero form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    transition: transform var(--transition-duration) ease;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     width: 100%;
     max-width: 600px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    height: 42px;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #E16A03;
-    color: white;
+.search-container input[type="text"] {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-container input[type="text"]:focus {
+    border-color: var(--hovedfarge);
+    box-shadow: 0 0 10px rgba(225, 106, 3, 0.5);
+}
+
+.search-container button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    background-color: var(--hovedfarge);
+    color: var(--hvit);
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-button:hover {
-    background-color: #cc5903; /* Mørkere oransje */
+.search-container button:hover {
+    background-color: #cc5903;
+    transform: translateY(-2px);
 }
 
-/* ---------- Resultatseksjon ---------- */
-.results {
-    margin: 20px auto;
-    width: 90%;
+/* ---------- Fixed Search Bar ---------- */
+.search-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--bakgrunn);
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    transition: top var(--transition-duration) ease, opacity var(--transition-duration) ease;
+    height: 60px; /* Fast høyde */
+    align-items: center;
 }
 
-.no-results {
+.search-fixed.hidden {
+    top: -60px; /* Flytt ut av synet */
+    opacity: 0;
+}
+
+.search-fixed.visible {
+    top: 0;
+    opacity: 1;
+}
+
+.search-fixed .search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.search-fixed input[type="text"] {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-fixed input[type="text"]:focus {
+    border-color: var(--hovedfarge);
+    box-shadow: 0 0 10px rgba(225, 106, 3, 0.5);
+}
+
+.search-fixed button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    background-color: var(--hovedfarge);
+    color: var(--hvit);
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-fixed button:hover {
+    background-color: #cc5903;
+    transform: translateY(-2px);
+}
+
+/* ---------- Sektjoner ---------- */
+.section {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 20px; /* Justert for å unngå overlapping */
+}
+
+.section h2 {
     text-align: center;
-    font-size: 18px;
-    color: #F44336; /* Rød */
+    color: var(--hovedfarge);
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    font-weight: 700;
 }
 
-/* ---------- Tabellstiler ---------- */
+.section h3 {
+    color: var(--hovedfarge);
+    margin-bottom: 20px;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* ---------- Forbedret Tabelldesign ---------- */
+.results-container {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.results {
+    background-color: var(--bakgrunn);
+    max-height: 400px; /* Juster etter behov for å vise ca. 10 rader */
+    overflow-y: scroll;
+    overflow-x: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+/* Skjul scrollbar */
+.results::-webkit-scrollbar {
+    display: none; /* For Webkit */
+}
+
+.results {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: #fff;
+    border-collapse: separate;
+    border-spacing: 0; /* Fjernet vertikal spacing */
+    background-color: var(--bakgrunn); /* Endret fra transparent til bakgrunnsfarge */
+    margin: 0;
+    font-size: 0.9rem;
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px 15px;
     text-align: left;
-}
-
-table th:first-child,
-table td:first-child {
-    width: 15%;
-    text-align: left;
+    background-color: var(--bakgrunn);
+    border-bottom: none; /* Fjern standard border */
 }
 
 th {
-    background-color: #E16A03;
-    color: white;
+    background-color: var(--hovedfarge);
+    color: var(--hvit);
     cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-weight: 700;
+    font-family: 'Montserrat', Arial, sans-serif;
+    border-radius: 5px 5px 0 0; /* Runde øverste hjørner */
+    transition: background-color 0.3s ease;
 }
 
 th:hover {
     background-color: #cc5903;
 }
 
+th::after {
+    content: ' ';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--hvit);
+    display: none;
+}
+
+th.sorted-asc::after {
+    display: block;
+    border-bottom-color: var(--hvit);
+    border-top-color: transparent;
+}
+
+th.sorted-desc::after {
+    display: block;
+    border-top-color: var(--hvit);
+    border-bottom-color: transparent;
+}
+
 td {
     vertical-align: middle;
+    font-family: 'Montserrat', Arial, sans-serif;
+    border-radius: 0 0 5px 5px; /* Runde nederste hjørner */
 }
 
 table tbody tr {
-    background-color: transparent;
-    transition: background-color 0.3s ease;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 5px;
 }
 
 table tbody tr:hover {
-    background-color: #f2f2f2;
+    background-color: var(--grå-60);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* Zebra Striping */
 table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+table tbody tr:nth-child(odd) {
     background-color: #f9f9f9;
 }
 
-/* ---------- EHF-status indikatorer ---------- */
+/* ---------- Marker Søkt Underenhet eller Hovedenhet ---------- */
+.searched-unit {
+    background-color: #fffbcc; /* Lys gul bakgrunn for å markere raden */
+    border-left: 5px solid var(--hovedfarge); /* En venstre kantlinje for ekstra markering */
+}
+
+.searched-unit td {
+    font-weight: bold; /* Gjør teksten fet for å skille den ut */
+}
+
+/* ---------- EHF-status indikatorer med ikoner ---------- */
 .ehf-status {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
 }
 
 .ehf-status.grønn {
-    background-color: #4CAF50; /* Grønn */
+    color: #4CAF50; /* Grønn */
 }
 
 .ehf-status.rød {
-    background-color: #F44336; /* Rød */
+    color: #F44336; /* Rød */
 }
 
 .ehf-status.gul {
-    background-color: #FFC107; /* Gul */
+    color: #FFC107; /* Gul */
     animation: puls 1s infinite;
 }
 
 /* Spinner for lastingsindikator */
 @keyframes puls {
-    0% {
-        opacity: 0.7;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.7;
-    }
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
 }
 
 .ehf-status.spinner {
     animation: puls 1s infinite;
 }
 
-/* ---------- Interaktivitet ---------- */
-td[ondblclick] {
-    cursor: pointer;
 }
 
-td[ondblclick]:hover {
-    background-color: #f1f1f1;
-}
-
-/* ---------- Gruppeheader ---------- */
-.gruppe-header {
-    background-color: #f4f4f4;
-    font-weight: bold;
-    text-align: left;
-    font-size: 16px;
-    color: #E16A03; /* Oransje tekst */
-}
-
-.gruppe-header td {
-    padding: 10px;
-    border: none;
-}
-
-/* ---------- Tilgjengelighet ---------- */
-button:focus,
-input[type="text"]:focus,
-td[ondblclick]:focus {
-    outline: 2px solid #E16A03;
-}
-
-/* ---------- Responsivt design ---------- */
-@media (max-width: 768px) {
-    body {
-        margin: 10px;
-    }
-
-    input[type="text"] {
-        width: 100%;
-    }
-
-    .results {
-        width: 100%;
-    }
-
-    table, th, td {
-        font-size: 14px;
-    }
-
-    th, td {
-        padding: 6px;
-    }
-}
-
-/* ---------- Send Tilbakemelding Knapp ---------- */
-#feedback-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #E16A03;
-    color: white;
-    border: none;
-    padding: 15px 20px;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-    z-index: 1000;
-}
-
-#feedback-button:hover {
-    background-color: #cc5903;
-}
 
 /* ---------- Modal Styling ---------- */
 .modal {
@@ -265,8 +496,8 @@ td[ondblclick]:focus {
 }
 
 #feedback-form button {
-    background-color: #E16A03;
-    color: white;
+    background-color: var(--hovedfarge);
+    color: var(--hvit);
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
@@ -278,26 +509,56 @@ td[ondblclick]:focus {
     background-color: #cc5903;
 }
 
-/* ---------- Flash Meldinger ---------- */
-.flash-messages {
+/* ---------- Responsivt design ---------- */
+@media (max-width: 768px) {
+    body {
+        margin: 10px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+    }
+
+    .results {
+        width: 100%;
+    }
+
+    table, th, td {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 6px;
+    }
+
+    /* Juster søkebar når den er fast plassert */
+    .search-fixed {
+        padding: 10px;
+    }
+
+    /* Fjernet Scroll Piler per brukerens ønske */
+}
+#feedback-button {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
-    z-index: 1002;
+    background-color: var(--hovedfarge);
+    color: var(--hvit);
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.flash-message {
-    padding: 15px 20px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    color: white;
-    opacity: 0.9;
-}
-
-.flash-message.success {
-    background-color: #4CAF50; /* Grønn */
-}
-
-.flash-message.error {
-    background-color: #F44336; /* Rød */
+#feedback-button:hover {
+    background-color: #cc5903;
+    transform: translateY(-2px);
 }
